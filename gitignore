@@ -1,0 +1,38 @@
+# ── Virtual environment ────────────────────────────────────────────
+venv/
+.venv/
+env/
+
+# ── Python cache ───────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# ── PyInstaller build output ───────────────────────────────────────
+build/
+dist/
+*.spec.bak
+
+# ── Inno Setup output ─────────────────────────────────────────────
+Output/
+
+# ── Config / secrets ──────────────────────────────────────────────
+*.env
+.env
+config.json          # local connection settings (per-machine)
+
+# ── IDE / editor ──────────────────────────────────────────────────
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ── OS junk ───────────────────────────────────────────────────────
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# ── Logs ──────────────────────────────────────────────────────────
+*.log
+logs/

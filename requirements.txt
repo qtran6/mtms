@@ -1,0 +1,8 @@
+# ── Client ────────────────────────────────────────────────────────
+PySide6==6.7.2
+
+# ── Server (add when you start the server side) ───────────────────
+# psycopg2-binary==2.9.9
+
+# ── Packaging (dev only, not bundled into the .exe) ───────────────
+# pyinstaller==6.9.0
