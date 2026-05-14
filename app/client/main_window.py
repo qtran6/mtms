@@ -7,7 +7,7 @@ from PySide6.QtGui import QPalette, QColor
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Inventory Manager")
+        self.setWindowTitle("MTIM")
         self.setMinimumSize(960, 600)
         self.resize(1280, 720)
 
