@@ -1,12 +1,19 @@
 from PySide6.QtCore import Qt, QPoint
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QSizePolicy, QMainWindow
+from PySide6.QtWidgets import QLabel, QStyle, QToolButton, QWidget, QHBoxLayout, QPushButton, QSizePolicy, QMainWindow
 
 # ── Title bar ─────────────────────────────────────────────────────────────────
 class TitleBar(QWidget):
-    def __init__(self, parent: QWidget, window: QMainWindow):
-        super().__init__(parent)
+    HEIGHT = 42
+
+    def __init__(self, window: QMainWindow):
+        super().__init__()
+        self._mouse_pos = None
         self._window = window
-        self.setFixedHeight(42)
+        self.setFixedHeight(self.HEIGHT)
+
+        self._icon = QLabel()
+        icon = self.style().standardIcon(QStyle.SP_ComputerIcon)
+        self._icon.setPixmap(icon.pixmap(16, 16))
 
         self._drag_pos = QPoint()
 
@@ -19,10 +26,11 @@ class TitleBar(QWidget):
 
         self._btn_close = QPushButton("✕")
         self._btn_close.setFixedSize(36, 28)
-        self._btn_close.setFlat(True)
+        # self._btn_close.setFlat(True)
         self._btn_close.setCursor(Qt.CursorShape.PointingHandCursor)
         self._btn_close.clicked.connect(self._window.close)
 
+        # layout.addWidget(self._icon)
         layout.addWidget(spacer)
         layout.addWidget(self._btn_close)
 
