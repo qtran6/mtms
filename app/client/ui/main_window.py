@@ -1,12 +1,14 @@
 import sys
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget,
-    QHBoxLayout, QVBoxLayout, QPushButton, QSizePolicy
+    QHBoxLayout, QVBoxLayout, QStackedLayout, QStackedWidget,
+    QPushButton, QSizePolicy
 )
 from PySide6.QtCore import Qt, QTimer, QPoint, QRect, QEvent
 from PySide6.QtGui import QPalette, QColor, QPainter, QBrush, QPainterPath, QPen
 
 from ..assets.themes.theme import load_theme
+from .title_bar import TitleBar
 from .pages import *
 
 
@@ -14,75 +16,6 @@ RADIUS = 12
 BORDER = 2
 SHADOW = 10
 RESTORE_SIZE = (1280, 720)
-
-
-# ── Title bar ─────────────────────────────────────────────────────────────────
-class TitleBar(QWidget):
-    def __init__(self, parent: QMainWindow):
-        super().__init__(parent)
-        self._window = parent
-        self.setFixedHeight(42)
-
-        # Track drag from title bar only
-        self._drag_pos = QPoint()
-
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(0, 0, 8, 0)
-        layout.setSpacing(0)
-
-        spacer = QWidget()
-        spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
-
-        self._btn_close = QPushButton("✕")
-        self._btn_close.setFixedSize(36, 28)
-        self._btn_close.setFlat(True)
-        self._btn_close.setCursor(Qt.CursorShape.PointingHandCursor)
-        self._btn_close.clicked.connect(self._window.close)
-
-        layout.addWidget(spacer)
-        layout.addWidget(self._btn_close)
-
-    # ── Drag from title bar ───────────────────────────────────────────────────
-    def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            self._drag_pos = (
-                event.globalPosition().toPoint() - self._window.frameGeometry().topLeft()
-            )
-
-    def mouseMoveEvent(self, event):
-        # if self._window.isMaximized():
-        #     return
-        if event.buttons() == Qt.MouseButton.LeftButton and not self._drag_pos.isNull():
-            if self._window.isMaximized():
-                # Restore window and adjust drag position
-                self._window.showNormal()
-            self._window.move(event.globalPosition().toPoint() - self._drag_pos)
-
-    def mouseReleaseEvent(self, event):
-        self._drag_pos = QPoint()
-
-    def mouseDoubleClickEvent(self, event):
-        if self._window.isMaximized():
-            self._window.showNormal()
-        else:
-            self._window.showMaximized()
-
-    def apply_theme(self, t: dict):
-        self.setStyleSheet("background: transparent;")
-        self._btn_close.setStyleSheet(f"""
-            QPushButton {{
-                color: {t['text']};
-                background: transparent;
-                border: none;
-                font-size: 14px;
-            }}
-            QPushButton:hover {{
-                background: {t['close_hover']};
-                color: {t['close_hover_text']};
-                border-radius: 4px;
-            }}
-        """)
-
 
 # ── Main window ───────────────────────────────────────────────────────────────
 class MainWindow(QMainWindow):
@@ -111,8 +44,9 @@ class MainWindow(QMainWindow):
         self._title_bar = TitleBar(self)
         root_layout.addWidget(self._title_bar)
 
-        self._content = QWidget()
+        self._content = QStackedWidget()
         self._order_page = OrderPage()
+        self._content.addWidget(self._order_page)
         self._content.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
         )
@@ -182,6 +116,7 @@ class MainWindow(QMainWindow):
         t = self._theme
 
         self._title_bar.apply_theme(t)
+        self._order_page.apply_theme(t)
         self._content.setStyleSheet("background: transparent;")
         self.centralWidget().setStyleSheet("#root { background: transparent; }")
 
