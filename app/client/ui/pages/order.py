@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QGridLayout, QTableWidget, QWidget
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QGridLayout, QTableWidget, QVBoxLayout, QWidget
 
 class OrderPage(QWidget):
     def __init__(self, parent=None):
@@ -8,14 +8,16 @@ class OrderPage(QWidget):
         self._grid.setContentsMargins(10, 10, 10, 10)
         # self._grid.setColumnStretch()
 
-        self._customer_name_layout = self._input_customer_name()
+        self._customer_name_layout = self._customer_name_text_box()
         self._table = self._createTable()
+        self._item_input_layout = self._addItemUI()
 
-        self._grid.addLayout(self._customer_name_layout, 0, 0)
-        self._grid.addWidget(self._table, 1, 0)
+        self._grid.addLayout(self._customer_name_layout, 0, 0, 3, 1)
+        self._grid.addWidget(self._table, 1, 1, 3, 5)
+        self._grid.addLayout(self._item_input_layout, 4, 0, 1, 6)
 
 
-    def _input_customer_name(self) -> QHBoxLayout:
+    def _customer_name_text_box(self) -> QHBoxLayout:
         customer_name_layout = QHBoxLayout()
 
         text = QLabel("Tên khách hàng:")
@@ -26,6 +28,7 @@ class OrderPage(QWidget):
         customer_name_layout.addWidget(text_box)
         
         return customer_name_layout
+    
 
     def _createTable(self) -> QTableWidget:
         table = QTableWidget(self)
@@ -37,8 +40,19 @@ class OrderPage(QWidget):
         return table
 
 
-    def _addItemUI(self):
-        ...
+    def _addItemUI(self) -> QVBoxLayout:
+        layout = QVBoxLayout()
+
+        brand_label = QLabel("Thương hiệu:")
+        brand_input = QLineEdit()
+        model_label = QLabel("Tên hàng hóa:")
+        model_input = QLineEdit()
+
+        layout.addWidget(brand_label)
+        layout.addWidget(brand_input)
+        layout.addWidget(model_label)
+        layout.addWidget(model_input)
+        return layout
 
 
     def apply_theme(self, t: dict): 
