@@ -132,6 +132,12 @@ def main():
     app.setStyle("Fusion")
     window = MainWindow()
     window.show()
+
+    def _start_maximized():
+        window.showMaximized()
+
+    QTimer.singleShot(0, _start_maximized)
+
     sys.exit(app.exec())
 
 

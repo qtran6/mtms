@@ -34,6 +34,7 @@ class TitleBar(QWidget):
         layout.addWidget(spacer)
         layout.addWidget(self._btn_close)
 
+
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             self._drag_pos = (
