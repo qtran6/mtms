@@ -19,22 +19,27 @@ def load_theme(mode: str) -> dict:
     """
     try:
         data = json.loads(_THEME_FILE.read_text(encoding="utf-8"))
-        return data[mode]
+        return {**data["base"], **data[mode]}  # Merge base with mode-specific overrides
     except Exception as e:
         print(f"[theme] Failed to load theme.json: {e} — using built-in fallback")
-        return _FALLBACK[mode]
+        return {**_FALLBACK["base"], **_FALLBACK[mode]}
 
 
 # Built-in fallback so the app never crashes if theme.json is missing
 _FALLBACK = {
+    "base": {
+        "close_hover":      "#c0392b",
+        "close_hover_text": "#ffffff",
+        "radius":           12,
+        "border_width":     2,
+        "shadow":           10
+    },
     "dark": {
         "background":        "#1a1a1f",
         "text":              "#e8e8ec",
         "border":            "#555560",
         "titlebar_bg":       "#1a1a1f",
         "btn_hover_bg":      "#2e2e35",
-        "close_hover":       "#c0392b",
-        "close_hover_text":  "#ffffff",
     },
     "light": {
         "background":        "#f5f4f0",
@@ -42,7 +47,5 @@ _FALLBACK = {
         "border":            "#aaaaaa",
         "titlebar_bg":       "#f5f4f0",
         "btn_hover_bg":      "#e0deda",
-        "close_hover":       "#c0392b",
-        "close_hover_text":  "#ffffff",
     },
 }

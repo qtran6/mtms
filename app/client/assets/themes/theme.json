@@ -1,20 +1,27 @@
 {
+  "base": {
+    "close_hover":      "#c0392b",
+    "close_hover_text": "#ffffff",
+    "radius":           12,
+    "border_width":     2,
+    "shadow":           10,
+    "font":             "Segoe UI",
+    "header_font":      "Segoe UI Semibold",
+    "header_size":      35,
+    "text_size":        30
+  },
   "dark": {
     "background":   "#1a1a1f",
     "text":         "#e8e8ec",
     "border":       "#555560",
     "titlebar_bg":  "#1a1a1f",
-    "btn_hover_bg": "#2e2e35",
-    "close_hover":  "#c0392b",
-    "close_hover_text": "#ffffff"
+    "btn_hover_bg": "#2e2e35"
   },
   "light": {
     "background":   "#f5f4f0",
     "text":         "#1a1a1f",
     "border":       "#aaaaaa",
     "titlebar_bg":  "#f5f4f0",
-    "btn_hover_bg": "#e0deda",
-    "close_hover":  "#c0392b",
-    "close_hover_text": "#ffffff"
+    "btn_hover_bg": "#e0deda"
   }
 }
