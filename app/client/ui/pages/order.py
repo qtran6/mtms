@@ -4,10 +4,14 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
-    QTableWidget,
+    QTableView,
     QVBoxLayout,
     QWidget,
+    QHeaderView,
+    QStyledItemDelegate
 )
+from PySide6.QtGui import QStandardItemModel, QStandardItem
+from PySide6.QtCore import Qt
 
 class OrderPage(QWidget):
     def __init__(self, parent=None):
@@ -45,11 +49,11 @@ class OrderPage(QWidget):
         customer_name_layout.setSpacing(12)
 
         text = QLabel("Tên khách hàng:")
-        text_box = QLineEdit()
-        text_box.setPlaceholderText("Nhập tên khách hàng...")
+        self._customer_text_box = QLineEdit()
+        self._customer_text_box.setPlaceholderText("Nhập tên khách hàng...")
 
         customer_name_layout.addWidget(text)
-        customer_name_layout.addWidget(text_box)
+        customer_name_layout.addWidget(self._customer_text_box)
         
         return customer_name_box
     
@@ -60,13 +64,45 @@ class OrderPage(QWidget):
         table_layout = QVBoxLayout(table_box)
         table_layout.setContentsMargins(12, 12, 12, 12)
 
-        table = QTableWidget()
+        table = QTableView()
 
-        table.setColumnCount(5)
-        table.setHorizontalHeaderLabels(["TT", "Tên HH", "Số lượng", "Đơn giá", "Thành tiền"])
-        table.setRowCount(10)
+        # Create a simple standard model with 10 rows and 4 columns
+        model = QStandardItemModel(10, 5)
+        model.setHorizontalHeaderLabels(["TT", "Tên HH", "Số lượng", "Đơn giá", "Thành tiền"])
+
+        table.setModel(model)
+        table.setObjectName("table_view")
+
+        # Set column widths and make Tên HH stretch
+        h_header = table.horizontalHeader()
+        h_header.setSectionResizeMode(0, QHeaderView.ResizeToContents)  # TT
+        h_header.setSectionResizeMode(1, QHeaderView.Stretch)            # Tên HH - stretches
+        h_header.setSectionResizeMode(2, QHeaderView.ResizeToContents)  # Số lượng
+        h_header.setSectionResizeMode(3, QHeaderView.ResizeToContents)  # Đơn giá
+        h_header.setSectionResizeMode(4, QHeaderView.ResizeToContents)  # Thành tiền
+
+        # Set alignment for each column
+        table.setItemDelegateForColumn(0, AlignDelegate("center")) # TT column centered
+        table.setItemDelegateForColumn(1, AlignDelegate("left"))   # Tên HH column left-aligned
+        table.setItemDelegateForColumn(2, AlignDelegate("center")) # Số lượng column centered
+        table.setItemDelegateForColumn(3, AlignDelegate("right")) # Đơn giá column right-aligned
+        table.setItemDelegateForColumn(4, AlignDelegate("right")) # Thành tiền column right-aligned
+
+        # Hide vertical header and add TT column as order numbers
+        table.verticalHeader().setVisible(False)
+        table.verticalHeader().setDefaultSectionSize(28)
+        
+        # Populate TT column with row numbers
+        for row in range(10):
+            item = QStandardItem(str(row + 1))
+            model.setItem(row, 0, item)
 
         table_layout.addWidget(table)
+
+        # Keep a reference to the view and model for theming or updates
+        self._table_view = table
+        self._table_model = model
+
         return table_box
 
 
@@ -92,28 +128,59 @@ class OrderPage(QWidget):
 
     def apply_theme(self, t: dict): 
         self.setStyleSheet(f"background: {t['background']};")
+        # Apply styling to the customer name box
         self._customer_name_box.setStyleSheet(f"""
             QFrame#customer_name_box {{
-                border: 1px solid {t['border']};
+                border: none;
                 background: {t['background']};
             }}
         """)
+        self._customer_text_box.setStyleSheet(f"""
+            QLineEdit {{
+                background: {t['background']};
+                color: {t['text']};
+                border: none;
+                padding: 4px;
+            }}
+        """)
+        # Apply styling to the item input box
         self._item_input_box.setStyleSheet(f"""
             QFrame#item_box {{
-                border: 1px solid {t['border']};
+                border: none;
                 background: {t['background']};
             }}
         """)
-        self._table.setStyleSheet(f"""
-            QTableWidget {{
-                background: {t['background']};
-                color: {t['text']};
-                gridline-color: {t['border']};
-                border: 1px solid {t['border']};
-            }}
-            QHeaderView::section {{
-                background: {t['background']};
-                color: {t['text']};
-                border: 1px solid {t['border']};
-            }}
-        """)
+        # Apply styling to the table view (applies to the view and its header)
+        if hasattr(self, '_table_view'):
+            self._table_view.setStyleSheet(f"""
+                QTableView {{
+                    background: {t['background']};
+                    color: {t['text']};
+                    gridline-color: {t['border']};
+                    border: none;
+                }}
+                QTableView QTableCornerButton:section {{
+                    background: {t['background']};
+                    color: {t['text']};
+                    border: 1px solid {t['border']};
+                }}
+                QHeaderView::section {{
+                    background: {t['background']};
+                    color: {t['text']};
+                    border: 1px solid {t['border']};
+                }}
+            """)
+
+class AlignDelegate(QStyledItemDelegate):
+    def __init__(self, alignment_name, parent=None):
+        super().__init__(parent)
+        alignment_map = {
+            "left": Qt.AlignLeft | Qt.AlignVCenter,
+            "center": Qt.AlignCenter,
+            "right": Qt.AlignRight | Qt.AlignVCenter
+        }
+        self._alignment = alignment_map.get(alignment_name, Qt.AlignLeft | Qt.AlignVCenter)
+
+    def initStyleOption(self, option, index):
+        super().initStyleOption(option, index)
+        option.displayAlignment = self._alignment
