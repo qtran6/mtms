@@ -23,7 +23,6 @@ class OrderPage(QWidget):
         self._grid = QGridLayout(self)
         # self._grid.setContentsMargins(24, 24, 24, 24)
         self._grid.setHorizontalSpacing(24)
-        self._grid.setVerticalSpacing(18)
         self._grid.setColumnStretch(0, 4)
         self._grid.setColumnStretch(1, 2)
 
@@ -42,7 +41,7 @@ class OrderPage(QWidget):
         left_layout.setStretch(1, 1)
 
         self._grid.addWidget(left_column, 0, 0)
-        self._grid.addWidget(self._item_input_box, 0, 1, 2, 1)
+        self._grid.addWidget(self._item_input_box, 0, 1)
 
     def _customer_name_text_box(self) -> QFrame:
         customer_name_box = QFrame()
@@ -157,7 +156,7 @@ class OrderPage(QWidget):
                 border: 1px solid {t['input_border']};
                 border-radius: {r}px;
                 padding: 20px;
-                selection-background-color: {t['btn_hover_bg']};
+                selection-background-color: {t['border']};
             }}
             QLineEdit:focus {{
                 border: 1px solid {t['input_border_focus']};
