@@ -2,13 +2,13 @@
   "base": {
     "close_hover":      "#c0392b",
     "close_hover_text": "#ffffff",
-    "radius":           12,
+    "radius":           15,
     "border_width":     2,
     "shadow":           10,
-    "font":             "Cascadia Code",
+    "font":             "Seagoe UI",
     "header_font":      "Segoe UI Semibold",
-    "header_size":      35,
-    "font_size":        21
+    "header_size":      20,
+    "font_size":        20
   },
   "dark": {
     "background":       "#1a1a1f",
@@ -18,7 +18,7 @@
     "titlebar_bg":      "#1a1a1f",
     "btn_hover_bg":     "#2e2e35",
     "card_bg":          "rgba(255, 255, 255, 0.04)",
-    "card_border":      "rgba(255, 255, 255, 0.10)",
+    "card_border":      "rgba(255, 255, 255, 1)",
     "card_border_hover":"rgba(255, 255, 255, 0.20)",
     "input_bg":         "rgba(255, 255, 255, 0.06)",
     "input_border":     "rgba(255, 255, 255, 0.12)",
@@ -32,8 +32,8 @@
     "border":           "#aaaaaa",
     "titlebar_bg":      "#f5f4f0",
     "btn_hover_bg":     "#e0deda",
-    "card_bg":          "rgba(0, 0, 0, 0.03)",
-    "card_border":      "rgba(0, 0, 0, 0.10)",
+    "card_bg":          "#f0ede4",
+    "card_border":      "rgba(0, 0, 0, 0.1)",
     "card_border_hover":"rgba(0, 0, 0, 0.20)",
     "input_bg":         "rgba(0, 0, 0, 0.04)",
     "input_border":     "rgba(0, 0, 0, 0.12)",
