@@ -123,12 +123,14 @@ class OrderPage(QWidget):
 
         brand_label = QLabel("Thương hiệu:")
         brand_input = QLineEdit()
+        brand_input.setPlaceholderText("Nhập thương hiệu...")
         model_label = QLabel("Tên hàng hóa:")
         model_input = QLineEdit()
+        model_input.setPlaceholderText("Nhập tên hàng hóa...")
 
-        layout.addWidget(brand_label)
+        # layout.addWidget(brand_label)
         layout.addWidget(brand_input)
-        layout.addWidget(model_label)
+        # layout.addWidget(model_label)
         layout.addWidget(model_input)
         layout.addStretch(1)
         return box
