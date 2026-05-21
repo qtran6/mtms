@@ -11,17 +11,33 @@
     "font_size":        21
   },
   "dark": {
-    "background":   "#1a1a1f",
-    "text":         "#e8e8ec",
-    "border":       "#555560",
-    "titlebar_bg":  "#1a1a1f",
-    "btn_hover_bg": "#2e2e35"
+    "background":       "#1a1a1f",
+    "text":             "#e8e8ec",
+    "text_secondary":   "#9090a0",
+    "border":           "#555560",
+    "titlebar_bg":      "#1a1a1f",
+    "btn_hover_bg":     "#2e2e35",
+    "card_bg":          "rgba(255, 255, 255, 0.04)",
+    "card_border":      "rgba(255, 255, 255, 0.10)",
+    "card_border_hover":"rgba(255, 255, 255, 0.20)",
+    "input_bg":         "rgba(255, 255, 255, 0.06)",
+    "input_border":     "rgba(255, 255, 255, 0.12)",
+    "input_border_focus":"rgba(255, 255, 255, 0.35)",
+    "placeholder":      "#55555f"
   },
   "light": {
-    "background":   "#f5f4f0",
-    "text":         "#1a1a1f",
-    "border":       "#aaaaaa",
-    "titlebar_bg":  "#f5f4f0",
-    "btn_hover_bg": "#e0deda"
+    "background":       "#f5f4f0",
+    "text":             "#1a1a1f",
+    "text_secondary":   "#70707a",
+    "border":           "#aaaaaa",
+    "titlebar_bg":      "#f5f4f0",
+    "btn_hover_bg":     "#e0deda",
+    "card_bg":          "rgba(0, 0, 0, 0.03)",
+    "card_border":      "rgba(0, 0, 0, 0.10)",
+    "card_border_hover":"rgba(0, 0, 0, 0.20)",
+    "input_bg":         "rgba(0, 0, 0, 0.04)",
+    "input_border":     "rgba(0, 0, 0, 0.12)",
+    "input_border_focus":"rgba(0, 0, 0, 0.35)",
+    "placeholder":      "#aaaaaa"
   }
 }
