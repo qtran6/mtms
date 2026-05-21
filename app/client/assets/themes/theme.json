@@ -5,10 +5,10 @@
     "radius":           12,
     "border_width":     2,
     "shadow":           10,
-    "font":             "Segoe UI",
+    "font":             "Cascadia Code",
     "header_font":      "Segoe UI Semibold",
     "header_size":      35,
-    "text_size":        30
+    "font_size":        21
   },
   "dark": {
     "background":   "#1a1a1f",

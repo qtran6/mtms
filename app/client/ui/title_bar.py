@@ -41,6 +41,7 @@ class TitleBar(QWidget):
                 event.globalPosition().toPoint() - self._window.frameGeometry().topLeft()
             )
 
+
     def mouseMoveEvent(self, event):
         if event.buttons() == Qt.MouseButton.LeftButton and not self._drag_pos.isNull():
             if self._window.isMaximized():
@@ -51,8 +52,10 @@ class TitleBar(QWidget):
                 )
             self._window.move(event.globalPosition().toPoint() - self._drag_pos)
 
+
     def mouseReleaseEvent(self, event):
         self._drag_pos = QPoint()
+
 
     def mouseDoubleClickEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -60,6 +63,7 @@ class TitleBar(QWidget):
                 self._window.showNormal()
             else:
                 self._window.showMaximized()
+                
 
     def apply_theme(self, t: dict):
         self.setStyleSheet("background: transparent;")

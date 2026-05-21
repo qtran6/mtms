@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (
     QPushButton, QSizePolicy
 )
 from PySide6.QtCore import Qt, QTimer, QPoint, QRect, QEvent
-from PySide6.QtGui import QPalette, QColor, QPainter, QBrush, QPainterPath, QPen
+from PySide6.QtGui import QFontDatabase, QPalette, QColor, QPainter, QBrush, QPainterPath, QPen
 
 from ..assets.themes.theme import load_theme
 from .title_bar import TitleBar
@@ -60,9 +60,11 @@ class MainWindow(QMainWindow):
         self._timer.timeout.connect(self._apply_theme)
         self._timer.start()
 
+
     def _set_margins(self, maximized: bool):
         m = 0 if maximized else SHADOW
         self.setContentsMargins(m, m, m, m)
+
 
     def changeEvent(self, event):
         super().changeEvent(event)
@@ -76,6 +78,7 @@ class MainWindow(QMainWindow):
                 self._set_margins(maximized)
                 self._apply_theme(force=True)
                 self.update()
+
 
     # ── Paint background + border ─────────────────────────────────────────────
     def paintEvent(self, event):
@@ -105,6 +108,7 @@ class MainWindow(QMainWindow):
     def _is_dark(self) -> bool:
         c = QApplication.palette().color(QPalette.ColorRole.Window)
         return (0.2126 * c.red() + 0.7152 * c.green() + 0.0722 * c.blue()) < 128
+    
 
     def _apply_theme(self, force: bool = False):
         dark = self._is_dark()
@@ -114,6 +118,11 @@ class MainWindow(QMainWindow):
 
         self._theme = load_theme("dark" if dark else "light")
         t = self._theme
+
+        # Apply font globally to the entire app
+        from PySide6.QtGui import QFont
+        app_font = QFont(t['font'], t['font_size'])
+        QApplication.setFont(app_font)
 
         self._title_bar.apply_theme(t)
         self._order_page.apply_theme(t)

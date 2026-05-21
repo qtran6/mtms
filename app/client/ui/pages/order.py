@@ -7,16 +7,20 @@ from PySide6.QtWidgets import (
     QTableView,
     QVBoxLayout,
     QWidget,
+    QApplication,
     QHeaderView,
     QStyledItemDelegate
 )
-from PySide6.QtGui import QStandardItemModel, QStandardItem
+from PySide6.QtGui import QStandardItemModel, QStandardItem, QFont
 from PySide6.QtCore import Qt
 
 class OrderPage(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        # Allow this page to receive focus when clicked so we can
+        # move focus away from child input widgets with a single click.
+        self.setFocusPolicy(Qt.ClickFocus)
         self._grid = QGridLayout(self)
         self._grid.setContentsMargins(24, 24, 24, 24)
         self._grid.setHorizontalSpacing(24)
@@ -76,7 +80,7 @@ class OrderPage(QWidget):
         # Set column widths and make Tên HH stretch
         h_header = table.horizontalHeader()
         h_header.setSectionResizeMode(0, QHeaderView.ResizeToContents)  # TT
-        h_header.setSectionResizeMode(1, QHeaderView.Stretch)            # Tên HH - stretches
+        h_header.setSectionResizeMode(1, QHeaderView.Stretch)           # Tên HH - stretches
         h_header.setSectionResizeMode(2, QHeaderView.ResizeToContents)  # Số lượng
         h_header.setSectionResizeMode(3, QHeaderView.ResizeToContents)  # Đơn giá
         h_header.setSectionResizeMode(4, QHeaderView.ResizeToContents)  # Thành tiền
@@ -104,6 +108,10 @@ class OrderPage(QWidget):
         self._table_model = model
 
         return table_box
+    
+
+    def _addItemToTable(self, item):
+        ...
 
 
     def _addItemUI(self) -> QWidget:
@@ -124,10 +132,25 @@ class OrderPage(QWidget):
         layout.addWidget(model_input)
         layout.addStretch(1)
         return box
+    
+
+    def mousePressEvent(self, event):
+        # Clear focus from whichever widget currently has it when clicking
+        # anywhere on this page (single click clears focus from inputs).
+        focused = QApplication.focusWidget()
+        if focused and focused is not self:
+            try:
+                focused.clearFocus()
+            except Exception:
+                pass
+        # Give the page itself focus so no child remains focused.
+        self.setFocus()
+        super().mousePressEvent(event)
 
 
     def apply_theme(self, t: dict): 
         self.setStyleSheet(f"background: {t['background']};")
+
         # Apply styling to the customer name box
         self._customer_name_box.setStyleSheet(f"""
             QFrame#customer_name_box {{
@@ -170,6 +193,7 @@ class OrderPage(QWidget):
                     border: 1px solid {t['border']};
                 }}
             """)
+
 
 class AlignDelegate(QStyledItemDelegate):
     def __init__(self, alignment_name, parent=None):

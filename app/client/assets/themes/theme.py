@@ -32,20 +32,24 @@ _FALLBACK = {
         "close_hover_text": "#ffffff",
         "radius":           12,
         "border_width":     2,
-        "shadow":           10
+        "shadow":           10,
+        "font":             "Segoe UI",
+        "header_font":      "Segoe UI Semibold",
+        "header_size":      35,
+        "font_size":        5
     },
     "dark": {
-        "background":        "#1a1a1f",
-        "text":              "#e8e8ec",
-        "border":            "#555560",
-        "titlebar_bg":       "#1a1a1f",
-        "btn_hover_bg":      "#2e2e35",
+        "background":   "#1a1a1f",
+        "text":         "#e8e8ec",
+        "border":       "#555560",
+        "titlebar_bg":  "#1a1a1f",
+        "btn_hover_bg": "#2e2e35"
     },
     "light": {
-        "background":        "#f5f4f0",
-        "text":              "#1a1a1f",
-        "border":            "#aaaaaa",
-        "titlebar_bg":       "#f5f4f0",
-        "btn_hover_bg":      "#e0deda",
-    },
+        "background":   "#f5f4f0",
+        "text":         "#1a1a1f",
+        "border":       "#aaaaaa",
+        "titlebar_bg":  "#f5f4f0",
+        "btn_hover_bg": "#e0deda"
+    }
 }
