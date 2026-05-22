@@ -4,14 +4,16 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
+    QPushButton,
     QTableView,
     QVBoxLayout,
     QWidget,
     QApplication,
     QHeaderView,
-    QStyledItemDelegate
+    QStyledItemDelegate,
+    QGraphicsDropShadowEffect
 )
-from PySide6.QtGui import QStandardItemModel, QStandardItem, QFont
+from PySide6.QtGui import QColor, QRgba64, QStandardItemModel, QStandardItem, QFont
 from PySide6.QtCore import Qt
 
 
@@ -92,7 +94,7 @@ class OrderPage(QWidget):
         table.setShowGrid(False)
         table.setAlternatingRowColors(True)
 
-        for row in range(10):
+        for row in range(30):
             item = QStandardItem(str(row + 1))
             model.setItem(row, 0, item)
 
@@ -121,8 +123,13 @@ class OrderPage(QWidget):
         model_input.setPlaceholderText("Nhập tên hàng hóa...")
         model_input.setObjectName("item_input")
 
+        submit_btn = QPushButton("Thêm")
+        submit_btn.setObjectName("submit_btn")
+        submit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+
         layout.addWidget(brand_input)
         layout.addWidget(model_input)
+        layout.addWidget(submit_btn)
         layout.addStretch(1)
         return box
 
@@ -141,11 +148,15 @@ class OrderPage(QWidget):
 
         self.setStyleSheet("background: transparent;")
 
+        # ── Apply shadow color ────────────────────────────────────────────────
+        self.set_shadow(self, t)
+
         # ── Shared card style ─────────────────────────────────────────────────
         card_style = f"""
             background: {t['card_bg']};
-            border: 1px solid {t['card_border']};
+            border: none;
             border-radius: {r}px;
+            padding: 10px;
         """
 
         # ── Shared input style ────────────────────────────────────────────────
@@ -154,7 +165,7 @@ class OrderPage(QWidget):
                 background: {t['input_bg']};
                 color: {t['text']};
                 border: 1px solid {t['input_border']};
-                border-radius: {r}px;
+                border-radius: {r-10}px;
                 padding: 20px;
                 selection-background-color: {t['border']};
             }}
@@ -199,7 +210,8 @@ class OrderPage(QWidget):
                     alternate-background-color: {t['card_bg']};
                     color: {t['text']};
                     gridline-color: transparent;
-                    border: none;
+                    border: 1px solid {t['border']};
+                    border-radius: {r-10}px;
                 }}
                 QTableView::item {{
                     border: 1px solid {t['border']};
@@ -210,9 +222,13 @@ class OrderPage(QWidget):
                     background: {t['btn_hover_bg']};
                     color: {t['text']};
                 }}
+                QTableView::item:selected:!active {{
+                    background: {t['card_bg']};
+                    color: {t['text']};
+                }}
                 QHeaderView {{
                     background: transparent;
-                    border: 1px solid {t['border']};
+                    border: none;
                 }}
                 QHeaderView::section {{
                     background: transparent;
@@ -221,9 +237,7 @@ class OrderPage(QWidget):
                     font-size: {t['header_size']}pt;
                     border: 1px solid {t['border']};
                     border-right: none;
-                }}
-                QHeaderView::section:last {{
-                    
+                    border-top: none;
                 }}
             """)
 
@@ -238,8 +252,44 @@ class OrderPage(QWidget):
                 border: none;
             }}
             {input_style}
+            QPushButton#submit_btn {{
+                color: {t['text']};
+                background: {t['btn_bg']};
+                border: none;
+                border-radius: {r-10}px;
+                padding: 10px;
+            }}
+            QPushButton#submit_btn:hover {{
+                background: {t['btn_hover_bg']};
+                color: {t['text']};
+            }}
         """)
 
+    def set_shadow(self, widget, t: dict):
+        # Core shadow
+        widget.shadow = QGraphicsDropShadowEffect(widget)
+        widget.shadow.setBlurRadius(3)
+        widget.shadow.setOffset(0, 1)
+        widget.shadow.setColor(self._parse_color(t["shadow"]))
+        # Cast shadow
+        widget.cast_shadow = QGraphicsDropShadowEffect(widget)
+        widget.cast_shadow.setBlurRadius(12)
+        widget.cast_shadow.setOffset(0, 6)
+        widget.cast_shadow.setColor(self._parse_color(t["cast_shadow"]))
+
+        widget.setGraphicsEffect(widget.shadow)
+        widget.setGraphicsEffect(widget.cast_shadow)
+
+    def _parse_color(self, rgba_str: str) -> QColor:
+        """Parse 'rgba(r, g, b, a)' where a is 0.0-1.0 into QColor."""
+        try:
+            inner = rgba_str.strip().removeprefix("rgba(").removesuffix(")")
+            r, g, b, a = [x.strip() for x in inner.split(",")]
+            color = QColor(int(r), int(g), int(b))
+            color.setAlphaF(float(a))
+            return color
+        except Exception:
+            return QColor(0, 0, 0, 80)
 
 class AlignDelegate(QStyledItemDelegate):
     def __init__(self, alignment_name, parent=None):
