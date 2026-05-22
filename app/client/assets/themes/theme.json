@@ -42,7 +42,7 @@
     "placeholder":      "#aaaaaa",
     "btn_bg":           "#e0deda",
     "btn_hover_bg":     "#e0deda",
-    "shadow":           "rgba(0, 0, 0, 0.1)",
+    "shadow":           "rgba(0, 0, 0, 0.5)",
     "cast_shadow":      "rgba(0, 0, 0, 0.08)"
   }
 }

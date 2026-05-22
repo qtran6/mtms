@@ -94,7 +94,7 @@ class OrderPage(QWidget):
         table.setShowGrid(False)
         table.setAlternatingRowColors(True)
 
-        for row in range(30):
+        for row in range(300):
             item = QStandardItem(str(row + 1))
             model.setItem(row, 0, item)
 
@@ -127,9 +127,18 @@ class OrderPage(QWidget):
         submit_btn.setObjectName("submit_btn")
         submit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
 
+        clear_btn = QPushButton("Xóa")
+        clear_btn.setObjectName("submit_btn")
+        clear_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+
+        btn_box = QWidget()
+        btn_layout = QHBoxLayout(btn_box)
+        btn_layout.addWidget(submit_btn)
+        btn_layout.addWidget(clear_btn)
+
         layout.addWidget(brand_input)
         layout.addWidget(model_input)
-        layout.addWidget(submit_btn)
+        layout.addWidget(btn_box)
         layout.addStretch(1)
         return box
 
@@ -214,9 +223,7 @@ class OrderPage(QWidget):
                     border-radius: {r-10}px;
                 }}
                 QTableView::item {{
-                    border: 1px solid {t['border']};
-                    border-right: none;
-                    border-top: none;
+                    border: none;
                 }}
                 QTableView::item:selected {{
                     background: {t['btn_hover_bg']};
@@ -238,6 +245,53 @@ class OrderPage(QWidget):
                     border: 1px solid {t['border']};
                     border-right: none;
                     border-top: none;
+                }}
+                QHeaderView::section:first {{
+                    border-left: none;
+                }}
+                QScrollBar:vertical {{
+                    background: transparent;
+                    width: 11px;
+                    margin: 70px 5px 30px 0px;
+                    border-radius: 3px;
+                }}
+                QScrollBar::handle:vertical {{
+                    background: {t['border']};
+                    min-height: 20px;
+                    border-radius: 3px;
+                }}
+                QScrollBar::handle:vertical:hover {{
+                    background: {t['text_secondary']};
+                }}
+                QScrollBar::add-line:vertical,
+                QScrollBar::sub-line:vertical {{
+                    height: 0px;
+                }}
+                QScrollBar::add-page:vertical,
+                QScrollBar::sub-page:vertical {{
+                    background: transparent;
+                }}
+                QScrollBar:horizontal {{
+                    background: transparent;
+                    height: 6px;
+                    margin: 0px;
+                    border-radius: 3px;
+                }}
+                QScrollBar::handle:horizontal {{
+                    background: {t['border']};
+                    min-width: 30px;
+                    border-radius: 3px;
+                }}
+                QScrollBar::handle:horizontal:hover {{
+                    background: {t['text_secondary']};
+                }}
+                QScrollBar::add-line:horizontal,
+                QScrollBar::sub-line:horizontal {{
+                    width: 0px;
+                }}
+                QScrollBar::add-page:horizontal,
+                QScrollBar::sub-page:horizontal {{
+                    background: transparent;
                 }}
             """)
 
@@ -268,17 +322,26 @@ class OrderPage(QWidget):
     def set_shadow(self, widget, t: dict):
         # Core shadow
         widget.shadow = QGraphicsDropShadowEffect(widget)
-        widget.shadow.setBlurRadius(3)
-        widget.shadow.setOffset(0, 1)
+        widget.shadow.setBlurRadius(20)
+        widget.shadow.setOffset(1, 1)
         widget.shadow.setColor(self._parse_color(t["shadow"]))
-        # Cast shadow
-        widget.cast_shadow = QGraphicsDropShadowEffect(widget)
-        widget.cast_shadow.setBlurRadius(12)
-        widget.cast_shadow.setOffset(0, 6)
-        widget.cast_shadow.setColor(self._parse_color(t["cast_shadow"]))
 
         widget.setGraphicsEffect(widget.shadow)
-        widget.setGraphicsEffect(widget.cast_shadow)
+
+    # def set_cast_shadow(self, widget, t: dict) -> QWidget:
+    #     wrapper = QWidget()
+    #     wrapper.setObjectName("shadow_wrapper")
+    #     wrapper_layout = QVBoxLayout(wrapper)
+    #     wrapper_layout.setContentsMargins(10, 10, 10, 10)  # room for shadow
+    #     wrapper_layout.addWidget(widget)
+
+    #     shadow = QGraphicsDropShadowEffect(wrapper)
+    #     shadow.setBlurRadius(20)
+    #     shadow.setOffset(0, 6)
+    #     shadow.setColor(self._parse_color(t.get("cast_shadow", "rgba(0,0,0,0.3)")))
+    #     wrapper.setGraphicsEffect(shadow)
+
+    #     return wrapper
 
     def _parse_color(self, rgba_str: str) -> QColor:
         """Parse 'rgba(r, g, b, a)' where a is 0.0-1.0 into QColor."""
