@@ -202,6 +202,9 @@ class OrderPage(QWidget):
                     border: none;
                 }}
                 QTableView::item {{
+                    border: 1px solid {t['border']};
+                    border-right: none;
+                    border-top: none;
                 }}
                 QTableView::item:selected {{
                     background: {t['btn_hover_bg']};
@@ -209,16 +212,18 @@ class OrderPage(QWidget):
                 }}
                 QHeaderView {{
                     background: transparent;
-                    border: none;
+                    border: 1px solid {t['border']};
                 }}
                 QHeaderView::section {{
                     background: transparent;
                     color: {t['text']};
                     font-family: '{t['header_font']}';
                     font-size: {t['header_size']}pt;
+                    border: 1px solid {t['border']};
+                    border-right: none;
                 }}
                 QHeaderView::section:last {{
-                    border-right: none;
+                    
                 }}
             """)
 
