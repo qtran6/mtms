@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
     QStyledItemDelegate,
     QGraphicsDropShadowEffect
 )
-from PySide6.QtGui import QColor, QRgba64, QStandardItemModel, QStandardItem, QFont
+from PySide6.QtGui import QColor, QRegion, QRgba64, QStandardItemModel, QStandardItem, QFont
 from PySide6.QtCore import Qt
 
 
@@ -32,9 +32,9 @@ class OrderPage(QWidget):
         self._table = self._createTable()
         self._item_input_box = self._addItemUI()
 
-        left_column = QWidget()
-        left_column.setObjectName("left_column")
-        left_layout = QVBoxLayout(left_column)
+        self._left_column = QWidget()
+        self._left_column.setObjectName("left_column")
+        left_layout = QVBoxLayout(self._left_column)
         left_layout.setContentsMargins(0, 0, 0, 0)
         left_layout.setSpacing(18)
         left_layout.addWidget(self._customer_name_box)
@@ -42,7 +42,7 @@ class OrderPage(QWidget):
         left_layout.setStretch(0, 0)
         left_layout.setStretch(1, 1)
 
-        self._grid.addWidget(left_column, 0, 0)
+        self._grid.addWidget(self._left_column, 0, 0)
         self._grid.addWidget(self._item_input_box, 0, 1)
 
     def _customer_name_text_box(self) -> QFrame:
@@ -70,11 +70,12 @@ class OrderPage(QWidget):
         # table_layout.setContentsMargins(12, 12, 12, 12)
 
         table = QTableView()
-        model = QStandardItemModel(10, 5)
+        model = QStandardItemModel(300, 5)
         model.setHorizontalHeaderLabels(["TT", "Tên HH", "Số lượng", "Đơn giá", "Thành tiền"])
 
         table.setModel(model)
         table.setObjectName("table_view")
+        table.setAlternatingRowColors(True)
 
         h_header = table.horizontalHeader()
         h_header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
@@ -92,7 +93,6 @@ class OrderPage(QWidget):
         table.verticalHeader().setVisible(False)
         table.verticalHeader().setDefaultSectionSize(32)
         table.setShowGrid(False)
-        table.setAlternatingRowColors(True)
 
         for row in range(300):
             item = QStandardItem(str(row + 1))
@@ -128,7 +128,7 @@ class OrderPage(QWidget):
         submit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
 
         clear_btn = QPushButton("Xóa")
-        clear_btn.setObjectName("submit_btn")
+        clear_btn.setObjectName("clear_btn")
         clear_btn.setCursor(Qt.CursorShape.PointingHandCursor)
 
         btn_box = QWidget()
@@ -157,8 +157,11 @@ class OrderPage(QWidget):
 
         self.setStyleSheet("background: transparent;")
 
-        # ── Apply shadow color ────────────────────────────────────────────────
+        # ── Apply shadow  ─────────────────────────────────────────────────────
         self.set_shadow(self, t)
+        self.set_cast_shadow(self._customer_name_box, t)
+        self.set_cast_shadow(self._left_column, t)
+        self.set_cast_shadow(self._item_input_box, t)
 
         # ── Shared card style ─────────────────────────────────────────────────
         card_style = f"""
@@ -174,16 +177,21 @@ class OrderPage(QWidget):
                 background: {t['input_bg']};
                 color: {t['text']};
                 border: 1px solid {t['input_border']};
-                border-radius: {r-10}px;
+                border-radius: {r-20}px;
                 padding: 20px;
                 selection-background-color: {t['border']};
+                placeholder-text-color: {t['placeholder']};
             }}
             QLineEdit:focus {{
                 border: 1px solid {t['input_border_focus']};
             }}
-            QLineEdit::placeholder {{
-                color: {t['placeholder']};
-            }}
+        """
+
+        # ── Shared button style ───────────────────────────────────────────────
+        button_style = f"""
+            color: {t['text']};
+            border: none;
+            border-radius: {r-20}px;
         """
 
         # ── Customer name card ────────────────────────────────────────────────
@@ -216,17 +224,21 @@ class OrderPage(QWidget):
             self._table_view.setStyleSheet(f"""
                 QTableView {{
                     background: transparent;
-                    alternate-background-color: {t['card_bg']};
+                    alternate-background-color: {t['btn_bg']};
                     color: {t['text']};
                     gridline-color: transparent;
-                    border: 1px solid {t['border']};
-                    border-radius: {r-10}px;
+                    border: 2px solid {t['border']};
+                    border-radius: {r}px;
+                }}
+                QTableView::item:alternate:selected {{
+                    background: {t['btn_hover_bg']};
                 }}
                 QTableView::item {{
-                    border: none;
+                    border: transparent;
+                    border-radius: {r}px;
                 }}
                 QTableView::item:selected {{
-                    background: {t['btn_hover_bg']};
+                    background: {t['btn_bg']};
                     color: {t['text']};
                 }}
                 QTableView::item:selected:!active {{
@@ -252,7 +264,7 @@ class OrderPage(QWidget):
                 QScrollBar:vertical {{
                     background: transparent;
                     width: 11px;
-                    margin: 70px 5px 30px 0px;
+                    margin: {r}px 2px {r}px 0px;
                     border-radius: 3px;
                 }}
                 QScrollBar::handle:vertical {{
@@ -307,41 +319,42 @@ class OrderPage(QWidget):
             }}
             {input_style}
             QPushButton#submit_btn {{
+                {button_style}
                 color: {t['text']};
                 background: {t['btn_bg']};
-                border: none;
-                border-radius: {r-10}px;
-                padding: 10px;
             }}
             QPushButton#submit_btn:hover {{
                 background: {t['btn_hover_bg']};
                 color: {t['text']};
+            }}
+            QPushButton#clear_btn {{
+                {button_style}
+                color: {t['text']};
+                background: {t['clear_btn_bg']};
+            }}
+            QPushButton#clear_btn:hover {{
+                background: {t['clear_btn_hover_bg']};
+                color: {t['close_hover_text']};
             }}
         """)
 
     def set_shadow(self, widget, t: dict):
         # Core shadow
         widget.shadow = QGraphicsDropShadowEffect(widget)
-        widget.shadow.setBlurRadius(20)
-        widget.shadow.setOffset(1, 1)
+        widget.shadow.setBlurRadius(3)
+        widget.shadow.setOffset(0, 1)
         widget.shadow.setColor(self._parse_color(t["shadow"]))
 
         widget.setGraphicsEffect(widget.shadow)
 
-    # def set_cast_shadow(self, widget, t: dict) -> QWidget:
-    #     wrapper = QWidget()
-    #     wrapper.setObjectName("shadow_wrapper")
-    #     wrapper_layout = QVBoxLayout(wrapper)
-    #     wrapper_layout.setContentsMargins(10, 10, 10, 10)  # room for shadow
-    #     wrapper_layout.addWidget(widget)
+    def set_cast_shadow(self, widget, t: dict):
+        # Core shadow
+        widget.shadow = QGraphicsDropShadowEffect(widget)
+        widget.shadow.setBlurRadius(12)
+        widget.shadow.setOffset(0, 3)
+        widget.shadow.setColor(self._parse_color(t["cast_shadow"]))
 
-    #     shadow = QGraphicsDropShadowEffect(wrapper)
-    #     shadow.setBlurRadius(20)
-    #     shadow.setOffset(0, 6)
-    #     shadow.setColor(self._parse_color(t.get("cast_shadow", "rgba(0,0,0,0.3)")))
-    #     wrapper.setGraphicsEffect(shadow)
-
-    #     return wrapper
+        widget.setGraphicsEffect(widget.shadow)
 
     def _parse_color(self, rgba_str: str) -> QColor:
         """Parse 'rgba(r, g, b, a)' where a is 0.0-1.0 into QColor."""
@@ -369,3 +382,25 @@ class AlignDelegate(QStyledItemDelegate):
     def initStyleOption(self, option, index):
         super().initStyleOption(option, index)
         option.displayAlignment = self._alignment
+
+class BorderDelegate(AlignDelegate):
+    def __init__(self, alignment_name, alt_color=None, 
+                 draw_right=True, border_color=None, parent=None):
+        super().__init__(alignment_name, alt_color, parent)
+        self._draw_right  = draw_right
+        self._border_color = border_color or QColor(100, 100, 100, 60)
+
+    def paint(self, painter, option, index):
+        super().paint(painter, option, index)
+        painter.save()
+        painter.setPen(self._border_color)
+        r = option.rect
+
+        # Bottom border between rows (always)
+        painter.drawLine(r.bottomLeft(), r.bottomRight())
+
+        # Right border between columns (not on last column)
+        if self._draw_right:
+            painter.drawLine(r.topRight(), r.bottomRight())
+
+        painter.restore()

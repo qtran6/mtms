@@ -28,9 +28,10 @@
     "cast_shadow":      "rgba(0, 0, 0, 0.25)"
   },
   "light": {
-    "background":       "#f0ede4",
-    "text":             "#1a1a1f",
+    "background":       "#deddd9",
+    "text":             "#454545",
     "text_secondary":   "#70707a",
+    "placeholder":      "#aaaaaa",
     "border":           "#aaaaaa",
     "titlebar_bg":      "#f5f4f0",
     "card_bg":          "#f5f4f0",
@@ -39,10 +40,11 @@
     "input_bg":         "rgba(0, 0, 0, 0.04)",
     "input_border":     "rgba(0, 0, 0, 0.12)",
     "input_border_focus":"rgba(0, 0, 0, 0.35)",
-    "placeholder":      "#aaaaaa",
     "btn_bg":           "#e0deda",
-    "btn_hover_bg":     "#e0deda",
-    "shadow":           "rgba(0, 0, 0, 0.5)",
+    "btn_hover_bg":     "#c4c0b9",
+    "clear_btn_bg":     "#fc0000",
+    "clear_btn_hover_bg":"#c40000",
+    "shadow":           "rgba(0, 0, 0, 0.1)",
     "cast_shadow":      "rgba(0, 0, 0, 0.08)"
   }
 }
