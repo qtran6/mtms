@@ -11,10 +11,10 @@ from PySide6.QtWidgets import (
     QApplication,
     QHeaderView,
     QStyledItemDelegate,
-    QGraphicsDropShadowEffect
+    QGraphicsDropShadowEffect,
+    QAbstractButton,
 )
-from PySide6 import QtWidgets
-from PySide6.QtGui import QColor, QRegion, QRgba64, QStandardItemModel, QStandardItem, QFont
+from PySide6.QtGui import QColor, QPainter, QRegion, QRgba64, QStandardItemModel, QStandardItem, QFont
 from PySide6.QtCore import Qt
 
 
@@ -220,10 +220,6 @@ class OrderPage(QWidget):
             }}
         """)
 
-        btn = self._table_view.findChild(QtWidgets.QAbstractButton)
-        if btn:
-            btn.setText("TT")
-
         if hasattr(self, '_table_view'):
             self._table_view.setStyleSheet(f"""
                 QTableView {{
@@ -252,7 +248,7 @@ class OrderPage(QWidget):
                 }}
                 QHeaderView#horizontal_header::section {{
                     border-right: 1px solid {t['border']};
-                    border-top: none;
+                    border-top: 1px solid {t['border']};
                     border-bottom: 1px solid {t['border']};
                 }}
                 QHeaderView#vertical_header::section {{
@@ -311,6 +307,11 @@ class OrderPage(QWidget):
                     background: transparent;
                 }}
             """)
+
+        btn = self._table_view.findChild(QAbstractButton)
+        if btn:
+            btn.setToolTip("TT")
+            print(btn.toolTip())
 
         # ── Item input card ───────────────────────────────────────────────────
         self._item_input_box.setStyleSheet(f"""
