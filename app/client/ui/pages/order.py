@@ -127,15 +127,20 @@ class OrderPage(QWidget):
         submit_btn.setObjectName("submit_btn")
         submit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
 
+        print_btn = QPushButton("In")
+        print_btn.setObjectName("print_btn")
+        print_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+
         clear_btn = QPushButton("Xóa")
         clear_btn.setObjectName("clear_btn")
         clear_btn.setCursor(Qt.CursorShape.PointingHandCursor)
 
         btn_box = QWidget()
-        btn_layout = QHBoxLayout(btn_box)
-        btn_layout.addWidget(submit_btn)
-        btn_layout.addWidget(clear_btn)
-
+        btn_layout = QGridLayout(btn_box)
+        btn_layout.addWidget(submit_btn, 0, 0, 2, 1)
+        btn_layout.addWidget(print_btn, 0, 1)
+        btn_layout.addWidget(clear_btn, 1, 1)
+        
         layout.addWidget(brand_input)
         layout.addWidget(model_input)
         layout.addWidget(btn_box)
@@ -192,6 +197,8 @@ class OrderPage(QWidget):
             color: {t['text']};
             border: none;
             border-radius: {r-20}px;
+            color: {t['text']};
+            background: {t['btn_bg']};
         """
 
         # ── Customer name card ────────────────────────────────────────────────
@@ -227,8 +234,8 @@ class OrderPage(QWidget):
                     color: {t['text']};
                     gridline-color: {t['border']};
                     border: 2px solid {t['border']};
-                    border-radius: {r}px;
-                    padding: 20px;
+                    border-radius: {r-10}px;
+                    padding: 20px 9px 20px 20px;
                 }}
                 QTableView::item {{
                     border: none;
@@ -326,10 +333,15 @@ class OrderPage(QWidget):
             {input_style}
             QPushButton#submit_btn {{
                 {button_style}
-                color: {t['text']};
-                background: {t['btn_bg']};
             }}
             QPushButton#submit_btn:hover {{
+                background: {t['btn_hover_bg']};
+                color: {t['text']};
+            }}
+            QPushButton#print_btn {{
+                {button_style}
+            }}
+            QPushButton#print_btn:hover {{
                 background: {t['btn_hover_bg']};
                 color: {t['text']};
             }}
