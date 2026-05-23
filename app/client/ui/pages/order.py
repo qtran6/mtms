@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
     QStyledItemDelegate,
     QGraphicsDropShadowEffect
 )
+from PySide6 import QtWidgets
 from PySide6.QtGui import QColor, QRegion, QRgba64, QStandardItemModel, QStandardItem, QFont
 from PySide6.QtCore import Qt
 
@@ -70,33 +71,32 @@ class OrderPage(QWidget):
         # table_layout.setContentsMargins(12, 12, 12, 12)
 
         table = QTableView()
-        model = QStandardItemModel(300, 5)
-        model.setHorizontalHeaderLabels(["TT", "Tên HH", "Số lượng", "Đơn giá", "Thành tiền"])
+        model = QStandardItemModel(300, 4)
+        model.setHorizontalHeaderLabels(["Tên HH", "Số lượng", "Đơn giá", "Thành tiền"])
 
         table.setModel(model)
         table.setObjectName("table_view")
-        table.setAlternatingRowColors(True)
 
+        table.horizontalHeader().setObjectName("horizontal_header")
         h_header = table.horizontalHeader()
-        h_header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
-        h_header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        h_header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        h_header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
         h_header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
         h_header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
-        h_header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
 
-        table.setItemDelegateForColumn(0, AlignDelegate("center"))
-        table.setItemDelegateForColumn(1, AlignDelegate("left"))
-        table.setItemDelegateForColumn(2, AlignDelegate("center"))
+        table.setItemDelegateForColumn(0, AlignDelegate("left"))
+        table.setItemDelegateForColumn(1, AlignDelegate("center"))
+        table.setItemDelegateForColumn(2, AlignDelegate("right"))
         table.setItemDelegateForColumn(3, AlignDelegate("right"))
-        table.setItemDelegateForColumn(4, AlignDelegate("right"))
 
-        table.verticalHeader().setVisible(False)
-        table.verticalHeader().setDefaultSectionSize(32)
-        table.setShowGrid(False)
+        # table.verticalHeader().setVisible(False)
+        table.verticalHeader().setObjectName("vertical_header")
+        table.verticalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
+        table.setShowGrid(True)
 
-        for row in range(300):
-            item = QStandardItem(str(row + 1))
-            model.setItem(row, 0, item)
+        # for row in range(300):
+        #     item = QStandardItem(str(row + 1))
+        #     model.setItem(row, 0, item)
 
         table_layout.addWidget(table)
 
@@ -220,22 +220,22 @@ class OrderPage(QWidget):
             }}
         """)
 
+        btn = self._table_view.findChild(QtWidgets.QAbstractButton)
+        if btn:
+            btn.setText("TT")
+
         if hasattr(self, '_table_view'):
             self._table_view.setStyleSheet(f"""
                 QTableView {{
                     background: transparent;
-                    alternate-background-color: {t['btn_bg']};
                     color: {t['text']};
-                    gridline-color: transparent;
+                    gridline-color: {t['border']};
                     border: 2px solid {t['border']};
                     border-radius: {r}px;
-                }}
-                QTableView::item:alternate:selected {{
-                    background: {t['btn_hover_bg']};
+                    padding: 20px;
                 }}
                 QTableView::item {{
-                    border: transparent;
-                    border-radius: {r}px;
+                    border: none;
                 }}
                 QTableView::item:selected {{
                     background: {t['btn_bg']};
@@ -245,26 +245,31 @@ class OrderPage(QWidget):
                     background: {t['card_bg']};
                     color: {t['text']};
                 }}
-                QHeaderView {{
+                QHeaderView{{
                     background: transparent;
                     border: none;
+                    color: {t['text']};
                 }}
-                QHeaderView::section {{
+                QHeaderView#horizontal_header::section {{
+                    border-right: 1px solid {t['border']};
+                    border-top: none;
+                    border-bottom: 1px solid {t['border']};
+                }}
+                QHeaderView#vertical_header::section {{
+                    border-left: 1px solid {t['border']};
+                    border-top: none;
+                    border-bottom: 1px solid {t['border']};
+                    border-right: 1px solid {t['border']};
+                }}
+                QTableView QTableCornerButton::section {{
                     background: transparent;
                     color: {t['text']};
-                    font-family: '{t['header_font']}';
-                    font-size: {t['header_size']}pt;
                     border: 1px solid {t['border']};
-                    border-right: none;
-                    border-top: none;
-                }}
-                QHeaderView::section:first {{
-                    border-left: none;
                 }}
                 QScrollBar:vertical {{
                     background: transparent;
                     width: 11px;
-                    margin: {r}px 2px {r}px 0px;
+                    margin: {r}px 0px {r}px 3px;
                     border-radius: 3px;
                 }}
                 QScrollBar::handle:vertical {{
@@ -329,7 +334,7 @@ class OrderPage(QWidget):
             }}
             QPushButton#clear_btn {{
                 {button_style}
-                color: {t['text']};
+                color: {t['close_hover_text']};
                 background: {t['clear_btn_bg']};
             }}
             QPushButton#clear_btn:hover {{
@@ -382,25 +387,3 @@ class AlignDelegate(QStyledItemDelegate):
     def initStyleOption(self, option, index):
         super().initStyleOption(option, index)
         option.displayAlignment = self._alignment
-
-class BorderDelegate(AlignDelegate):
-    def __init__(self, alignment_name, alt_color=None, 
-                 draw_right=True, border_color=None, parent=None):
-        super().__init__(alignment_name, alt_color, parent)
-        self._draw_right  = draw_right
-        self._border_color = border_color or QColor(100, 100, 100, 60)
-
-    def paint(self, painter, option, index):
-        super().paint(painter, option, index)
-        painter.save()
-        painter.setPen(self._border_color)
-        r = option.rect
-
-        # Bottom border between rows (always)
-        painter.drawLine(r.bottomLeft(), r.bottomRight())
-
-        # Right border between columns (not on last column)
-        if self._draw_right:
-            painter.drawLine(r.topRight(), r.bottomRight())
-
-        painter.restore()
