@@ -4,7 +4,7 @@
     "close_hover_text": "#ffffff",
     "radius":           30,
     "border_width":     2,
-    "font":             "Seagoe UI",
+    "font":             "Segoe UI Bold",
     "header_font":      "Segoe UI Semibold",
     "header_size":      20,
     "font_size":        20
@@ -32,7 +32,7 @@
     "text":             "#454545",
     "text_secondary":   "#70707a",
     "placeholder":      "#aaaaaa",
-    "border":           "#aaaaaa",
+    "border":           "#c7c2b5",
     "titlebar_bg":      "#f5f4f0",
     "card_bg":          "#f5f4f0",
     "card_border":      "rgba(0, 0, 0, 0.1)",

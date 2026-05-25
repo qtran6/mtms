@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
+    QSizePolicy,
     QTableView,
     QVBoxLayout,
     QWidget,
@@ -14,7 +15,7 @@ from PySide6.QtWidgets import (
     QGraphicsDropShadowEffect,
     QAbstractButton,
 )
-from PySide6.QtGui import QColor, QPainter, QRegion, QRgba64, QStandardItemModel, QStandardItem, QFont
+from PySide6.QtGui import QColor, QStandardItemModel
 from PySide6.QtCore import Qt
 
 
@@ -140,6 +141,10 @@ class OrderPage(QWidget):
         btn_layout.addWidget(submit_btn, 0, 0, 2, 1)
         btn_layout.addWidget(print_btn, 0, 1)
         btn_layout.addWidget(clear_btn, 1, 1)
+
+        submit_btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        print_btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        clear_btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         
         layout.addWidget(brand_input)
         layout.addWidget(model_input)
@@ -197,7 +202,6 @@ class OrderPage(QWidget):
             color: {t['text']};
             border: none;
             border-radius: {r-20}px;
-            color: {t['text']};
             background: {t['btn_bg']};
         """
 
