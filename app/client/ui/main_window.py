@@ -7,9 +7,9 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, QTimer, QPoint, QRect, QEvent
 from PySide6.QtGui import QFontDatabase, QPalette, QColor, QPainter, QBrush, QPainterPath, QPen
 
-from ..core.theme import load_theme
-from .title_bar import TitleBar
-from .pages import *
+from client.core.theme import load_theme
+from client.ui.pages import *
+from client.ui.title_bar import TitleBar
 
 
 RADIUS = 12

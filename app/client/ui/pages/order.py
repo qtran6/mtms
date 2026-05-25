@@ -18,8 +18,9 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QColor, QStandardItemModel
 from PySide6.QtCore import QEvent, QObject, Qt
-from ...core.data_loader import load_products
-from ...core.completer import combo_completer
+from client.core.data_loader import load_products
+from client.core.completer import combo_completer
+from client.ui.custom_widgets import *
 
 class OrderPage(QWidget):
     def __init__(self, parent=None):
@@ -120,7 +121,15 @@ class OrderPage(QWidget):
         return table_box
 
     def _on_submit(self, item):
-        ...
+        brand = self._brand_input.currentText()
+        model = self._model_input.currentText()
+        print(f"Submitted: {brand} {model}")
+
+        if not brand or not model:
+            return
+        
+        price = None
+        
 
     def _addItemUI(self) -> QFrame:
         box = QFrame()
@@ -449,35 +458,3 @@ class OrderPage(QWidget):
             return color
         except Exception:
             return QColor(0, 0, 0, 80)
-
-class AlignDelegate(QStyledItemDelegate):
-    def __init__(self, alignment_name, parent=None):
-        super().__init__(parent)
-        alignment_map = {
-            "left":   Qt.AlignmentFlag.AlignLeft  | Qt.AlignmentFlag.AlignVCenter,
-            "center": Qt.AlignmentFlag.AlignCenter,
-            "right":  Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
-        }
-        self._alignment = alignment_map.get(
-            alignment_name, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
-        )
-
-    def initStyleOption(self, option, index):
-        super().initStyleOption(option, index)
-        option.displayAlignment = self._alignment
-
-class LoopBackOnTab(QObject):
-    def __init__(self, target, parent=None):
-        super().__init__(parent)
-        self._target = target
-
-    def eventFilter(self, obj, event):
-        if (event.type() == QEvent.Type.KeyPress and
-            event.key() == Qt.Key.Key_Tab and
-            not (event.modifiers() & Qt.KeyboardModifier.ShiftModifier)):
-            if hasattr(self._target, "lineEdit") and self._target.lineEdit():
-                self._target.lineEdit().setFocus()
-            else:
-                self._target.setFocus()
-            return True
-        return False

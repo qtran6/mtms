@@ -9,7 +9,7 @@ Usage:
 import json
 from pathlib import Path
 
-_THEME_FILE = Path(__file__).parent / "theme.json"
+_THEME_FILE = Path(__file__).parent.parent / "assets" / "themes" / "theme.json"
 
 
 def load_theme(mode: str) -> dict:
