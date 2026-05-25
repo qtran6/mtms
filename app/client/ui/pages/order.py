@@ -16,11 +16,12 @@ from PySide6.QtWidgets import (
     QGraphicsDropShadowEffect,
     QAbstractButton,
 )
-from PySide6.QtGui import QColor, QStandardItemModel
+from PySide6.QtGui import QColor, QStandardItem, QStandardItemModel
 from PySide6.QtCore import QEvent, QObject, Qt
 from client.core.data_loader import load_products
 from client.core.completer import combo_completer
 from client.ui.custom_widgets import *
+from client.core.order_service import find_product, format_price, calc_total
 
 class OrderPage(QWidget):
     def __init__(self, parent=None):
@@ -120,17 +121,6 @@ class OrderPage(QWidget):
 
         return table_box
 
-    def _on_submit(self, item):
-        brand = self._brand_input.currentText()
-        model = self._model_input.currentText()
-        print(f"Submitted: {brand} {model}")
-
-        if not brand or not model:
-            return
-        
-        price = None
-        
-
     def _addItemUI(self) -> QFrame:
         box = QFrame()
         box.setObjectName("item_box")
@@ -196,8 +186,47 @@ class OrderPage(QWidget):
         self._submit_btn  = submit_btn
         self._print_btn   = print_btn
         self._clear_btn   = clear_btn
+
+        submit_btn.clicked.connect(self._on_submit)
+        model_input.lineEdit().returnPressed.connect(self._on_submit)
     
         return box
+    
+    def _on_submit(self):
+        brand = self._brand_input.currentText().strip()
+        name  = self._model_input.currentText().strip()
+
+        if not brand or not name:
+            return
+
+        product = find_product(self._products, brand, name)
+        if not product:
+            return
+
+        target_row = self._find_first_empty_row()
+        if target_row is None:
+            target_row = self._table_model.rowCount()
+            self._table_model.insertRow(target_row)
+
+        model = self._table_model
+        model.setItem(target_row, 0, QStandardItem(product["name"]))
+        model.setItem(target_row, 1, QStandardItem(""))
+        model.setItem(target_row, 2, QStandardItem(format_price(product["price"])))
+        model.setItem(target_row, 3, QStandardItem(""))
+
+        self._model_input.setCurrentIndex(-1)
+        self._model_input.lineEdit().clear()
+        self._model_input.setFocus()
+
+
+    def _find_first_empty_row(self) -> int | None:
+        """Return the index of the first empty row, or None if all are full."""
+        model = self._table_model
+        for row in range(model.rowCount()):
+            item = model.item(row, 0)
+            if item is None or item.text().strip() == "":
+                return row
+        return None
 
     def mousePressEvent(self, event):
         focused = QApplication.focusWidget()
