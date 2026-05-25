@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import (
+    QWidget,
     QFrame,
     QGridLayout,
     QHBoxLayout,
@@ -8,20 +9,24 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QTableView,
     QVBoxLayout,
-    QWidget,
     QApplication,
     QHeaderView,
+    QComboBox,
     QStyledItemDelegate,
     QGraphicsDropShadowEffect,
     QAbstractButton,
 )
 from PySide6.QtGui import QColor, QStandardItemModel
-from PySide6.QtCore import Qt
-
+from PySide6.QtCore import QEvent, QObject, Qt
+from ...core.data_loader import load_products
+from ...core.completer import combo_completer
 
 class OrderPage(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
+        # Load products and extract brands for the brand completer
+        self._products = load_products()
+        self._brands = list(dict.fromkeys(p["brand"] for p in self._products))
 
         self.setFocusPolicy(Qt.ClickFocus)
         self._grid = QGridLayout(self)
@@ -46,6 +51,14 @@ class OrderPage(QWidget):
 
         self._grid.addWidget(self._left_column, 0, 0)
         self._grid.addWidget(self._item_input_box, 0, 1)
+
+        # Tab order: customer -> brand -> model -> brand (loop)
+        QWidget.setTabOrder(self._customer_text_box, self._brand_input)
+        QWidget.setTabOrder(self._brand_input, self._model_input)
+
+        # Custom loop: submit Tab -> brand
+        self._loop_filter = LoopBackOnTab(self._brand_input, self)
+        self._model_input.installEventFilter(self._loop_filter)
 
     def _customer_name_text_box(self) -> QFrame:
         customer_name_box = QFrame()
@@ -106,7 +119,7 @@ class OrderPage(QWidget):
 
         return table_box
 
-    def _addItemToTable(self, item):
+    def _on_submit(self, item):
         ...
 
     def _addItemUI(self) -> QFrame:
@@ -116,13 +129,31 @@ class OrderPage(QWidget):
         # layout.setContentsMargins(20, 20, 20, 20)  # padding via margins
         layout.setSpacing(12)
 
-        brand_input = QLineEdit()
-        brand_input.setPlaceholderText("Nhập thương hiệu...")
+        brand_input = QComboBox()
         brand_input.setObjectName("item_input")
+        brand_input.setEditable(True)
+        brand_input.addItems(self._brands)
+        brand_input.setCurrentIndex(-1)
+        brand_input.setPlaceholderText("Nhập thương hiệu...")
+        brand_input.lineEdit().setPlaceholderText("Nhập thương hiệu...")
 
-        model_input = QLineEdit()
-        model_input.setPlaceholderText("Nhập tên hàng hóa...")
+        model_input = QComboBox()
         model_input.setObjectName("item_input")
+        model_input.setEditable(True)
+        model_input.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
+        model_input.lineEdit().setPlaceholderText("Nhập tên hàng hóa...")
+
+        combo_completer(model_input)
+
+        def _on_brand_changed(text):
+            names = [p["name"] for p in self._products if p["brand"] == text]
+            model_input.clear()
+            model_input.addItems(names)
+            model_input.setCurrentIndex(-1)
+            model_input.lineEdit().setPlaceholderText("Nhập tên hàng hóa...")
+            combo_completer(model_input)
+        brand_input.currentTextChanged.connect(_on_brand_changed)
+
 
         submit_btn = QPushButton("Thêm")
         submit_btn.setObjectName("submit_btn")
@@ -141,7 +172,7 @@ class OrderPage(QWidget):
         btn_layout.addWidget(submit_btn, 0, 0, 2, 1)
         btn_layout.addWidget(print_btn, 0, 1)
         btn_layout.addWidget(clear_btn, 1, 1)
-
+        
         submit_btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         print_btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         clear_btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -150,6 +181,13 @@ class OrderPage(QWidget):
         layout.addWidget(model_input)
         layout.addWidget(btn_box)
         layout.addStretch(1)
+
+        self._brand_input = brand_input
+        self._model_input = model_input
+        self._submit_btn  = submit_btn
+        self._print_btn   = print_btn
+        self._clear_btn   = clear_btn
+    
         return box
 
     def mousePressEvent(self, event):
@@ -335,6 +373,29 @@ class OrderPage(QWidget):
                 border: none;
             }}
             {input_style}
+            QComboBox {{
+                background: {t['input_bg']};
+                color: {t['text']};
+                border: 1px solid {t['input_border']};
+                border-radius: {r-20}px;
+                padding: 20px;
+                placeholder-text-color: {t['placeholder']};
+            }}
+            QComboBox:focus {{
+                border: 1px solid {t['input_border_focus']};
+            }}
+            QComboBox QLineEdit {{
+                background: transparent;
+                color: {t['text']};
+                border: none;
+                placeholder-text-color: {t['placeholder']};
+            }}
+            QComboBox QAbstractItemView {{
+                background: {t['card_bg']};
+                color: {t['text']};
+                selection-background-color: {t['btn_hover_bg']};
+                border: 1px solid {t['border']};
+            }}
             QPushButton#submit_btn {{
                 {button_style}
             }}
@@ -404,3 +465,19 @@ class AlignDelegate(QStyledItemDelegate):
     def initStyleOption(self, option, index):
         super().initStyleOption(option, index)
         option.displayAlignment = self._alignment
+
+class LoopBackOnTab(QObject):
+    def __init__(self, target, parent=None):
+        super().__init__(parent)
+        self._target = target
+
+    def eventFilter(self, obj, event):
+        if (event.type() == QEvent.Type.KeyPress and
+            event.key() == Qt.Key.Key_Tab and
+            not (event.modifiers() & Qt.KeyboardModifier.ShiftModifier)):
+            if hasattr(self._target, "lineEdit") and self._target.lineEdit():
+                self._target.lineEdit().setFocus()
+            else:
+                self._target.setFocus()
+            return True
+        return False

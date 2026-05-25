@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, QTimer, QPoint, QRect, QEvent
 from PySide6.QtGui import QFontDatabase, QPalette, QColor, QPainter, QBrush, QPainterPath, QPen
 
-from ..assets.themes.theme import load_theme
+from ..core.theme import load_theme
 from .title_bar import TitleBar
 from .pages import *
 
