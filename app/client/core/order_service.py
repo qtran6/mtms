@@ -8,14 +8,16 @@ holds references to the widgets and wires up callbacks.
 from PySide6.QtCore import Qt, QTimer, QObject, QEvent
 from PySide6.QtWidgets import QTableWidgetItem
 
+from client.ui.custom_widgets.enter_down_filter import EnterDownFilter
 
-# ── Alignment constants ───────────────────────────────────────────────────────
+
+# Alignment constants ---------------------------------------------------------------------
 ALIGN_LEFT   = Qt.AlignmentFlag.AlignLeft   | Qt.AlignmentFlag.AlignVCenter
 ALIGN_CENTER = Qt.AlignmentFlag.AlignCenter
 ALIGN_RIGHT  = Qt.AlignmentFlag.AlignRight  | Qt.AlignmentFlag.AlignVCenter
 
 
-# ── Pure data helpers ─────────────────────────────────────────────────────────
+# Pure data helpers -----------------------------------------------------------------------
 def find_product(products: list[dict], brand: str, name: str) -> dict | None:
     for p in products:
         if p["brand"] == brand and p["name"] == name:
@@ -37,7 +39,7 @@ def make_item(text: str, alignment=ALIGN_LEFT) -> QTableWidgetItem:
     return item
 
 
-# ── Controller — owns the widget references and event handlers ────────────────
+# Controller - owns the widget references and event handlers -------------------------
 class OrderController:
     """
     Wires up the Order page widgets. Holds references and handles user actions.
@@ -48,7 +50,7 @@ class OrderController:
         self.page = page  # reference to OrderPage instance
         self._select_all_filter = self._SelectAllFilter(page)
 
-    # ── Public bind point — called from OrderPage after widgets exist ─────────
+    # Public bind point — called from OrderPage after widgets exist ------------------
     def bind(self):
         page = self.page
         page._brand_input.currentTextChanged.connect(self.on_brand_changed)
@@ -57,8 +59,11 @@ class OrderController:
         page._model_input.lineEdit().installEventFilter(self._select_all_filter)
         page._table_view.cellChanged.connect(self.on_cell_changed)
         page._clear_btn.clicked.connect(self.on_clear)
+        page._print_btn.clicked.connect(self.on_print)
+        self._enter_down_filter = EnterDownFilter(self.page)
+        self.page._table_view.installEventFilter(self._enter_down_filter)
 
-    # ── Brand changed: refill name combo ──────────────────────────────────────
+    # Brand changed: refill name combo
     def on_brand_changed(self, text: str):
         from client.core.completer import combo_completer
         names = names_for_brand(self.page._products, text)
@@ -69,7 +74,7 @@ class OrderController:
         m.lineEdit().setPlaceholderText("Nhập tên hàng hóa...")
         combo_completer(m)
 
-    # ── Submit: add row to table ──────────────────────────────────────────────
+    # Submit: add item to table --------------------------------------------------
     def on_submit(self):
         page = self.page
         brand = page._brand_input.currentText().strip()
@@ -94,14 +99,16 @@ class OrderController:
             target_row = table.rowCount()
             table.insertRow(target_row)
 
+        table.blockSignals(True)
         table.setItem(target_row, 0, make_item(product["name"], ALIGN_LEFT))
         table.setItem(target_row, 1, make_item("", ALIGN_CENTER))
         table.setItem(target_row, 2, make_item(format_price(product["price"]), ALIGN_RIGHT))
         table.setItem(target_row, 3, make_item("", ALIGN_RIGHT))
+        table.blockSignals(False)
 
         QTimer.singleShot(100, self._reset_model_input)
 
-    # Clear table
+    # Clear table ----------------------------------------------------------------
     def on_clear(self):
         page = self.page
 
@@ -119,15 +126,23 @@ class OrderController:
         # Focus back to customer name
         page._customer_text_box.setFocus()
 
-    # Cell change events
+    # Cell change events -----------------------------------------------------------
     def on_cell_changed(self, row: int, col: int):
-        if col != 1:
+        if col not in (1, 2):  # only quantity and price changes affect total
             return
 
         table = self.page._table_view
         qty_item = table.item(row, 1)
         price_item = table.item(row, 2)
         if not qty_item or not price_item:
+            return
+        
+        qty_text = qty_item.text().strip()
+        price_text = price_item.text().strip()
+        if not qty_text or not price_text:
+            table.blockSignals(True)
+            table.setItem(row, 3, make_item("", ALIGN_RIGHT))
+            table.blockSignals(False)
             return
 
         try:
@@ -149,7 +164,18 @@ class OrderController:
         table.setItem(row, 3, make_item(format_price(total), ALIGN_RIGHT))
         table.blockSignals(False)
 
-    # ── Helpers ───────────────────────────────────────────────────────────────
+    # Print order ----------------------------------------------------------------
+    def on_print(self):
+        from client.core.printer import print_order
+        page = self.page
+        print_order(
+            parent=page,
+            customer=page._customer_text_box.text(),
+            table=page._table_view,
+            products=page._products,
+        )
+
+    # Helpers ----------------------------------------------------------------------
     def _find_first_empty_row(self) -> int | None:
         table = self.page._table_view
         for row in range(table.rowCount()):
@@ -172,7 +198,7 @@ class OrderController:
                 return True
         return False
 
-    # ── Nested filter ─────────────────────────────────────────────────────────
+    # Nested filter ----------------------------------------------------------------
     class _SelectAllFilter(QObject):
         def eventFilter(self, obj, event):
             if event.type() == QEvent.Type.FocusIn:

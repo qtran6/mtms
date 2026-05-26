@@ -1,5 +1,4 @@
-from .align_delegate import AlignDelegate
 from .loop_back_filter import LoopBackOnTab
-from .clear_on_edit_delegate import ClearOnEditDelegate
+from .enter_down_filter import EnterDownFilter
 
-__all__ = ["AlignDelegate", "LoopBackOnTab", "ClearOnEditDelegate"]
+__all__ = ["LoopBackOnTab", "EnterDownFilter"]

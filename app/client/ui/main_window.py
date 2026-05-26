@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (
     QPushButton, QSizePolicy
 )
 from PySide6.QtCore import Qt, QTimer, QPoint, QRect, QEvent
-from PySide6.QtGui import QFontDatabase, QPalette, QColor, QPainter, QBrush, QPainterPath, QPen
+from PySide6.QtGui import QFontDatabase, QKeySequence, QPalette, QColor, QPainter, QBrush, QPainterPath, QPen, QShortcut
 
 from client.core.theme import load_theme
 from client.ui.pages import *
@@ -54,6 +54,8 @@ class MainWindow(QMainWindow):
 
         self._set_margins(maximized=False)
         self._apply_theme()
+
+        QShortcut(QKeySequence.StandardKey.Print, self, activated=self._trigger_print)
 
         self._timer = QTimer(self)
         self._timer.setInterval(2000)
@@ -134,6 +136,12 @@ class MainWindow(QMainWindow):
         palette.setColor(QPalette.ColorRole.WindowText, QColor(t["text"]))
         self.setPalette(palette)
         self.update()
+
+    def _trigger_print(self):
+        # Find the current page and call its print handler if available
+        current = self._content.currentWidget()  # or however you track current page
+        if hasattr(current, "_controller") and hasattr(current._controller, "on_print"):
+            current._controller.on_print()
 
 
 def main():
