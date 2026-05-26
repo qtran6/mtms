@@ -17,11 +17,17 @@ from PySide6.QtWidgets import (
     QAbstractButton,
 )
 from PySide6.QtGui import QColor, QStandardItem, QStandardItemModel
-from PySide6.QtCore import QEvent, QObject, Qt
+from PySide6.QtCore import QEvent, QObject, QTimer, Qt
 from client.core.data_loader import load_products
 from client.core.completer import combo_completer
 from client.ui.custom_widgets import *
-from client.core.order_service import find_product, format_price, calc_total
+from client.core.order_service import (
+    find_product, 
+    format_price, 
+    calc_total, 
+    make_item, 
+    ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT
+)
 
 class OrderPage(QWidget):
     def __init__(self, parent=None):
@@ -87,7 +93,7 @@ class OrderPage(QWidget):
         # table_layout.setContentsMargins(12, 12, 12, 12)
 
         table = QTableView()
-        model = QStandardItemModel(300, 4)
+        model = QStandardItemModel(0, 4)
         model.setHorizontalHeaderLabels(["Tên HH", "Số lượng", "Đơn giá", "Thành tiền"])
 
         table.setModel(model)
@@ -100,15 +106,13 @@ class OrderPage(QWidget):
         h_header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
         h_header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
 
-        table.setItemDelegateForColumn(0, AlignDelegate("left"))
-        table.setItemDelegateForColumn(1, AlignDelegate("center"))
-        table.setItemDelegateForColumn(2, AlignDelegate("right"))
-        table.setItemDelegateForColumn(3, AlignDelegate("right"))
-
         # table.verticalHeader().setVisible(False)
         table.verticalHeader().setObjectName("vertical_header")
         table.verticalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
+        table.verticalHeader().setVisible(True)
+        table.verticalHeader().setMinimumWidth(40)
         table.setShowGrid(True)
+        table.installEventFilter(self)
 
         # for row in range(300):
         #     item = QStandardItem(str(row + 1))
@@ -209,11 +213,15 @@ class OrderPage(QWidget):
             self._table_model.insertRow(target_row)
 
         model = self._table_model
-        model.setItem(target_row, 0, QStandardItem(product["name"]))
-        model.setItem(target_row, 1, QStandardItem(""))
-        model.setItem(target_row, 2, QStandardItem(format_price(product["price"])))
-        model.setItem(target_row, 3, QStandardItem(""))
+        model.setItem(target_row, 0, make_item(product["name"], ALIGN_LEFT))
+        model.setItem(target_row, 1, make_item("", ALIGN_CENTER))
+        model.setItem(target_row, 2, make_item(format_price(product["price"]), ALIGN_RIGHT))
+        model.setItem(target_row, 3, make_item("", ALIGN_RIGHT))
 
+        # Reset inputs
+        QTimer.singleShot(100, self._reset_model_input)
+
+    def _reset_model_input(self):
         self._model_input.setCurrentIndex(-1)
         self._model_input.lineEdit().clear()
         self._model_input.setFocus()
