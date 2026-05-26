@@ -7,19 +7,18 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QPushButton,
     QSizePolicy,
-    QTableView,
+    QTableWidget,
     QVBoxLayout,
     QApplication,
     QHeaderView,
     QComboBox,
-    QAbstractButton,
     QGraphicsDropShadowEffect,
 )
-from PySide6.QtGui import QColor, QStandardItemModel
+from PySide6.QtGui import QColor
 from PySide6.QtCore import Qt
 
-from client.core.data_loader import load_products
 from client.core.completer import combo_completer
+from client.core.data_loader import load_products
 from client.core.order_service import OrderController
 from client.ui.custom_widgets import *
 
@@ -90,12 +89,9 @@ class OrderPage(QWidget):
         table_box.setObjectName("table_box")
         table_layout = QVBoxLayout(table_box)
 
-        table = QTableView()
-        model = QStandardItemModel(0, 4)
-        model.setHorizontalHeaderLabels(["Tên HH", "Số lượng", "Đơn giá", "Thành tiền"])
-
-        table.setModel(model)
+        table = QTableWidget(0, 4)
         table.setObjectName("table_view")
+        table.setHorizontalHeaderLabels(["Tên HH", "Số lượng", "Đơn giá", "Thành tiền"])
 
         table.horizontalHeader().setObjectName("horizontal_header")
         h_header = table.horizontalHeader()
@@ -107,12 +103,13 @@ class OrderPage(QWidget):
         table.verticalHeader().setObjectName("vertical_header")
         table.verticalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
         table.verticalHeader().setMinimumWidth(40)
+
+        table.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
         table.setShowGrid(True)
 
         table_layout.addWidget(table)
 
         self._table_view = table
-        self._table_model = model
 
         return table_box
 
@@ -243,7 +240,7 @@ class OrderPage(QWidget):
 
         if hasattr(self, '_table_view'):
             self._table_view.setStyleSheet(f"""
-                QTableView {{
+                QTableWidget {{
                     background: transparent;
                     color: {t['text']};
                     gridline-color: {t['border']};
@@ -251,9 +248,9 @@ class OrderPage(QWidget):
                     border-radius: {r-10}px;
                     padding: 20px 9px 20px 20px;
                 }}
-                QTableView::item {{ border: none; }}
-                QTableView::item:selected {{ background: {t['btn_bg']}; color: {t['text']}; }}
-                QTableView::item:selected:!active {{ background: {t['card_bg']}; color: {t['text']}; }}
+                QTableWidget::item {{ border: none; }}
+                QTableWidget::item:selected {{ background: {t['btn_bg']}; color: {t['text']}; }}
+                QTableWidget::item:selected:!active {{ background: {t['card_bg']}; color: {t['text']}; }}
                 QHeaderView {{ background: transparent; border: none; color: {t['text']}; }}
                 QHeaderView#horizontal_header::section {{
                     border-right: 1px solid {t['border']};
@@ -266,7 +263,7 @@ class OrderPage(QWidget):
                     border-bottom: 1px solid {t['border']};
                     border-right: 1px solid {t['border']};
                 }}
-                QTableView QTableCornerButton::section {{
+                QTableWidget QTableCornerButton::section {{
                     background: transparent;
                     color: {t['text']};
                     border: 1px solid {t['border']};

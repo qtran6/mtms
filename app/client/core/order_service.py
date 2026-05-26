@@ -5,8 +5,8 @@ Pure helpers stay at module level. UI glue lives in OrderController which
 holds references to the widgets and wires up callbacks.
 """
 
-from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QStandardItem
+from PySide6.QtCore import Qt, QTimer, QObject, QEvent
+from PySide6.QtWidgets import QTableWidgetItem
 
 
 # ── Alignment constants ───────────────────────────────────────────────────────
@@ -35,8 +35,8 @@ def calc_total(quantity: int, price: float) -> float:
     return quantity * price
 
 
-def make_item(text: str, alignment=ALIGN_LEFT) -> QStandardItem:
-    item = QStandardItem(text)
+def make_item(text: str, alignment=ALIGN_LEFT) -> QTableWidgetItem:
+    item = QTableWidgetItem(text)
     item.setTextAlignment(alignment)
     return item
 
@@ -50,13 +50,15 @@ class OrderController:
 
     def __init__(self, page):
         self.page = page  # reference to OrderPage instance
+        self._select_all_filter = self._SelectAllFilter(page)
 
-    # Public bind point — called from OrderPage after widgets exist
+    # ── Public bind point — called from OrderPage after widgets exist ─────────
     def bind(self):
         page = self.page
         page._brand_input.currentTextChanged.connect(self.on_brand_changed)
         page._submit_btn.clicked.connect(self.on_submit)
         page._model_input.lineEdit().returnPressed.connect(self.on_submit)
+        page._model_input.lineEdit().installEventFilter(self._select_all_filter)
 
     # ── Brand changed: refill name combo ──────────────────────────────────────
     def on_brand_changed(self, text: str):
@@ -82,24 +84,30 @@ class OrderController:
         if not product:
             return
 
+        # Skip if already in the table
+        if self._is_duplicate(product["name"]):
+            QTimer.singleShot(100, self._reset_model_input)
+            return
+
+        table = page._table_view
+
         target_row = self._find_first_empty_row()
         if target_row is None:
-            target_row = page._table_model.rowCount()
-            page._table_model.insertRow(target_row)
+            target_row = table.rowCount()
+            table.insertRow(target_row)
 
-        m = page._table_model
-        m.setItem(target_row, 0, make_item(product["name"], ALIGN_LEFT))
-        m.setItem(target_row, 1, make_item("",                 ALIGN_CENTER))
-        m.setItem(target_row, 2, make_item(format_price(product["price"]), ALIGN_RIGHT))
-        m.setItem(target_row, 3, make_item("",                 ALIGN_RIGHT))
+        table.setItem(target_row, 0, make_item(product["name"],          ALIGN_LEFT))
+        table.setItem(target_row, 1, make_item("",                       ALIGN_CENTER))
+        table.setItem(target_row, 2, make_item(format_price(product["price"]), ALIGN_RIGHT))
+        table.setItem(target_row, 3, make_item("",                       ALIGN_RIGHT))
 
         QTimer.singleShot(100, self._reset_model_input)
 
     # ── Helpers ───────────────────────────────────────────────────────────────
     def _find_first_empty_row(self) -> int | None:
-        m = self.page._table_model
-        for row in range(m.rowCount()):
-            item = m.item(row, 0)
+        table = self.page._table_view
+        for row in range(table.rowCount()):
+            item = table.item(row, 0)
             if item is None or item.text().strip() == "":
                 return row
         return None
@@ -109,3 +117,19 @@ class OrderController:
         m.setCurrentIndex(-1)
         m.lineEdit().clear()
         m.setFocus()
+
+    def _is_duplicate(self, name: str) -> bool:
+        table = self.page._table_view
+        for row in range(table.rowCount()):
+            item = table.item(row, 0)
+            if item and item.text().strip() == name:
+                return True
+        return False
+
+    # ── Nested filter ─────────────────────────────────────────────────────────
+    class _SelectAllFilter(QObject):
+        def eventFilter(self, obj, event):
+            if event.type() == QEvent.Type.FocusIn:
+                if hasattr(obj, "selectAll"):
+                    QTimer.singleShot(0, obj.selectAll)
+            return False
