@@ -248,10 +248,27 @@ class OrderPage(QWidget):
                     border-radius: {r-10}px;
                     padding: 20px 9px 20px 20px;
                 }}
-                QTableWidget::item {{ border: none; }}
-                QTableWidget::item:selected {{ background: {t['btn_bg']}; color: {t['text']}; }}
-                QTableWidget::item:selected:!active {{ background: {t['card_bg']}; color: {t['text']}; }}
-                QHeaderView {{ background: transparent; border: none; color: {t['text']}; }}
+                QTableWidget::item {{ 
+                    border: none; 
+                }}
+                QTableWidget::item:selected {{ 
+                    background: {t['btn_bg']};
+                    color: {t['text']};
+                }}
+                QTableWidget::item:selected:!active {{ 
+                    background: {t['card_bg']};
+                    color: {t['text']}; 
+                }}
+                QTableWidget QLineEdit {{
+                    background: {t['card_bg']};
+                    color: {t['text']};
+                    border: none;
+                }}
+                QHeaderView {{ 
+                    background: transparent;
+                    border: none;
+                    color: {t['text']}; 
+                }}
                 QHeaderView#horizontal_header::section {{
                     border-right: 1px solid {t['border']};
                     border-top: 1px solid {t['border']};
@@ -282,8 +299,12 @@ class OrderPage(QWidget):
                 QScrollBar::handle:vertical:hover {{
                     background: {t['text_secondary']};
                 }}
-                QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; }}
-                QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{ background: transparent; }}
+                QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ 
+                    height: 0px;
+                }}
+                QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{ 
+                    background: transparent;
+                }}
                 QScrollBar:horizontal {{
                     background: transparent;
                     height: 6px;
@@ -295,9 +316,15 @@ class OrderPage(QWidget):
                     min-width: 30px;
                     border-radius: 3px;
                 }}
-                QScrollBar::handle:horizontal:hover {{ background: {t['text_secondary']}; }}
-                QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ width: 0px; }}
-                QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{ background: transparent; }}
+                QScrollBar::handle:horizontal:hover {{ 
+                    background: {t['text_secondary']};
+                }}
+                QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ 
+                    width: 0px;
+                }}
+                QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{ 
+                    background: transparent; 
+                }}
             """)
 
         # Item input card

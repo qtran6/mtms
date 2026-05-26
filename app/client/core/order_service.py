@@ -22,18 +22,14 @@ def find_product(products: list[dict], brand: str, name: str) -> dict | None:
             return p
     return None
 
-
 def names_for_brand(products: list[dict], brand: str) -> list[str]:
     return [p["name"] for p in products if p["brand"] == brand]
-
 
 def format_price(price: float) -> str:
     return f"{price:,.0f}"
 
-
 def calc_total(quantity: int, price: float) -> float:
     return quantity * price
-
 
 def make_item(text: str, alignment=ALIGN_LEFT) -> QTableWidgetItem:
     item = QTableWidgetItem(text)
@@ -59,6 +55,8 @@ class OrderController:
         page._submit_btn.clicked.connect(self.on_submit)
         page._model_input.lineEdit().returnPressed.connect(self.on_submit)
         page._model_input.lineEdit().installEventFilter(self._select_all_filter)
+        page._table_view.cellChanged.connect(self.on_cell_changed)
+        page._clear_btn.clicked.connect(self.on_clear)
 
     # ── Brand changed: refill name combo ──────────────────────────────────────
     def on_brand_changed(self, text: str):
@@ -96,12 +94,60 @@ class OrderController:
             target_row = table.rowCount()
             table.insertRow(target_row)
 
-        table.setItem(target_row, 0, make_item(product["name"],          ALIGN_LEFT))
-        table.setItem(target_row, 1, make_item("",                       ALIGN_CENTER))
+        table.setItem(target_row, 0, make_item(product["name"], ALIGN_LEFT))
+        table.setItem(target_row, 1, make_item("", ALIGN_CENTER))
         table.setItem(target_row, 2, make_item(format_price(product["price"]), ALIGN_RIGHT))
-        table.setItem(target_row, 3, make_item("",                       ALIGN_RIGHT))
+        table.setItem(target_row, 3, make_item("", ALIGN_RIGHT))
 
         QTimer.singleShot(100, self._reset_model_input)
+
+    # Clear table
+    def on_clear(self):
+        page = self.page
+
+        # Clear table
+        page._table_view.blockSignals(True)
+        page._table_view.setRowCount(0)
+        page._table_view.blockSignals(False)
+
+        # Clear inputs
+        page._customer_text_box.clear()
+        page._brand_input.setCurrentIndex(-1)
+        page._model_input.clear()
+        page._model_input.lineEdit().clear()
+
+        # Focus back to customer name
+        page._customer_text_box.setFocus()
+
+    # Cell change events
+    def on_cell_changed(self, row: int, col: int):
+        if col != 1:
+            return
+
+        table = self.page._table_view
+        qty_item = table.item(row, 1)
+        price_item = table.item(row, 2)
+        if not qty_item or not price_item:
+            return
+
+        try:
+            qty = int(qty_item.text().strip())
+        except ValueError:
+            table.blockSignals(True)
+            table.setItem(row, 3, make_item("", ALIGN_RIGHT))
+            table.blockSignals(False)
+            return
+
+        try:
+            price = float(price_item.text().replace(",", ""))
+        except ValueError:
+            return
+
+        total = calc_total(qty, price)
+
+        table.blockSignals(True)
+        table.setItem(row, 3, make_item(format_price(total), ALIGN_RIGHT))
+        table.blockSignals(False)
 
     # ── Helpers ───────────────────────────────────────────────────────────────
     def _find_first_empty_row(self) -> int | None:
