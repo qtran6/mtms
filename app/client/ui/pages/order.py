@@ -12,33 +12,29 @@ from PySide6.QtWidgets import (
     QApplication,
     QHeaderView,
     QComboBox,
-    QStyledItemDelegate,
-    QGraphicsDropShadowEffect,
     QAbstractButton,
+    QGraphicsDropShadowEffect,
 )
-from PySide6.QtGui import QColor, QStandardItem, QStandardItemModel
-from PySide6.QtCore import QEvent, QObject, QTimer, Qt
+from PySide6.QtGui import QColor, QStandardItemModel
+from PySide6.QtCore import Qt
+
 from client.core.data_loader import load_products
 from client.core.completer import combo_completer
+from client.core.order_service import OrderController
 from client.ui.custom_widgets import *
-from client.core.order_service import (
-    find_product, 
-    format_price, 
-    calc_total, 
-    make_item, 
-    ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT
-)
+
 
 class OrderPage(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        # Load products and extract brands for the brand completer
+
+        # ── Load data ─────────────────────────────────────────────────────────
         self._products = load_products()
         self._brands = list(dict.fromkeys(p["brand"] for p in self._products))
 
+        # ── Page layout ───────────────────────────────────────────────────────
         self.setFocusPolicy(Qt.ClickFocus)
         self._grid = QGridLayout(self)
-        # self._grid.setContentsMargins(24, 24, 24, 24)
         self._grid.setHorizontalSpacing(24)
         self._grid.setColumnStretch(0, 4)
         self._grid.setColumnStretch(1, 2)
@@ -60,19 +56,22 @@ class OrderPage(QWidget):
         self._grid.addWidget(self._left_column, 0, 0)
         self._grid.addWidget(self._item_input_box, 0, 1)
 
-        # Tab order: customer -> brand -> model -> brand (loop)
+        # ── Tab order ─────────────────────────────────────────────────────────
         QWidget.setTabOrder(self._customer_text_box, self._brand_input)
         QWidget.setTabOrder(self._brand_input, self._model_input)
 
-        # Custom loop: submit Tab -> brand
         self._loop_filter = LoopBackOnTab(self._brand_input, self)
         self._model_input.installEventFilter(self._loop_filter)
 
+        # ── Wire up business logic ────────────────────────────────────────────
+        self._controller = OrderController(self)
+        self._controller.bind()
+
+    # ── Sub-widget builders ───────────────────────────────────────────────────
     def _customer_name_text_box(self) -> QFrame:
         customer_name_box = QFrame()
         customer_name_box.setObjectName("customer_name_box")
         customer_name_layout = QHBoxLayout(customer_name_box)
-        # customer_name_layout.setContentsMargins(20, 16, 20, 16)  # padding via margins
         customer_name_layout.setSpacing(20)
 
         text = QLabel("Tên khách hàng:")
@@ -90,7 +89,6 @@ class OrderPage(QWidget):
         table_box = QFrame()
         table_box.setObjectName("table_box")
         table_layout = QVBoxLayout(table_box)
-        # table_layout.setContentsMargins(12, 12, 12, 12)
 
         table = QTableView()
         model = QStandardItemModel(0, 4)
@@ -106,17 +104,10 @@ class OrderPage(QWidget):
         h_header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
         h_header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
 
-        # table.verticalHeader().setVisible(False)
         table.verticalHeader().setObjectName("vertical_header")
         table.verticalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
-        table.verticalHeader().setVisible(True)
         table.verticalHeader().setMinimumWidth(40)
         table.setShowGrid(True)
-        table.installEventFilter(self)
-
-        # for row in range(300):
-        #     item = QStandardItem(str(row + 1))
-        #     model.setItem(row, 0, item)
 
         table_layout.addWidget(table)
 
@@ -129,9 +120,9 @@ class OrderPage(QWidget):
         box = QFrame()
         box.setObjectName("item_box")
         layout = QVBoxLayout(box)
-        # layout.setContentsMargins(20, 20, 20, 20)  # padding via margins
         layout.setSpacing(12)
 
+        # Brand combo
         brand_input = QComboBox()
         brand_input.setObjectName("item_input")
         brand_input.setEditable(True)
@@ -140,24 +131,15 @@ class OrderPage(QWidget):
         brand_input.setPlaceholderText("Nhập thương hiệu...")
         brand_input.lineEdit().setPlaceholderText("Nhập thương hiệu...")
 
+        # Model combo
         model_input = QComboBox()
         model_input.setObjectName("item_input")
         model_input.setEditable(True)
         model_input.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
         model_input.lineEdit().setPlaceholderText("Nhập tên hàng hóa...")
-
         combo_completer(model_input)
 
-        def _on_brand_changed(text):
-            names = [p["name"] for p in self._products if p["brand"] == text]
-            model_input.clear()
-            model_input.addItems(names)
-            model_input.setCurrentIndex(-1)
-            model_input.lineEdit().setPlaceholderText("Nhập tên hàng hóa...")
-            combo_completer(model_input)
-        brand_input.currentTextChanged.connect(_on_brand_changed)
-
-
+        # Buttons
         submit_btn = QPushButton("Thêm")
         submit_btn.setObjectName("submit_btn")
         submit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -173,69 +155,27 @@ class OrderPage(QWidget):
         btn_box = QWidget()
         btn_layout = QGridLayout(btn_box)
         btn_layout.addWidget(submit_btn, 0, 0, 2, 1)
-        btn_layout.addWidget(print_btn, 0, 1)
-        btn_layout.addWidget(clear_btn, 1, 1)
-        
-        submit_btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        print_btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        clear_btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        
+        btn_layout.addWidget(print_btn,  0, 1)
+        btn_layout.addWidget(clear_btn,  1, 1)
+
+        for b in (submit_btn, print_btn, clear_btn):
+            b.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+
         layout.addWidget(brand_input)
         layout.addWidget(model_input)
         layout.addWidget(btn_box)
         layout.addStretch(1)
 
+        # Store references for OrderController
         self._brand_input = brand_input
         self._model_input = model_input
         self._submit_btn  = submit_btn
         self._print_btn   = print_btn
         self._clear_btn   = clear_btn
 
-        submit_btn.clicked.connect(self._on_submit)
-        model_input.lineEdit().returnPressed.connect(self._on_submit)
-    
         return box
-    
-    def _on_submit(self):
-        brand = self._brand_input.currentText().strip()
-        name  = self._model_input.currentText().strip()
 
-        if not brand or not name:
-            return
-
-        product = find_product(self._products, brand, name)
-        if not product:
-            return
-
-        target_row = self._find_first_empty_row()
-        if target_row is None:
-            target_row = self._table_model.rowCount()
-            self._table_model.insertRow(target_row)
-
-        model = self._table_model
-        model.setItem(target_row, 0, make_item(product["name"], ALIGN_LEFT))
-        model.setItem(target_row, 1, make_item("", ALIGN_CENTER))
-        model.setItem(target_row, 2, make_item(format_price(product["price"]), ALIGN_RIGHT))
-        model.setItem(target_row, 3, make_item("", ALIGN_RIGHT))
-
-        # Reset inputs
-        QTimer.singleShot(100, self._reset_model_input)
-
-    def _reset_model_input(self):
-        self._model_input.setCurrentIndex(-1)
-        self._model_input.lineEdit().clear()
-        self._model_input.setFocus()
-
-
-    def _find_first_empty_row(self) -> int | None:
-        """Return the index of the first empty row, or None if all are full."""
-        model = self._table_model
-        for row in range(model.rowCount()):
-            item = model.item(row, 0)
-            if item is None or item.text().strip() == "":
-                return row
-        return None
-
+    # ── Focus handling ────────────────────────────────────────────────────────
     def mousePressEvent(self, event):
         focused = QApplication.focusWidget()
         if focused and focused is not self:
@@ -246,18 +186,18 @@ class OrderPage(QWidget):
         self.setFocus()
         super().mousePressEvent(event)
 
+    # ── Theme ─────────────────────────────────────────────────────────────────
     def apply_theme(self, t: dict):
         r = t.get("radius", 12)
 
         self.setStyleSheet("background: transparent;")
 
-        # ── Apply shadow  ─────────────────────────────────────────────────────
+        # Shadows
         self.set_shadow(self, t)
         self.set_cast_shadow(self._customer_name_box, t)
         self.set_cast_shadow(self._left_column, t)
         self.set_cast_shadow(self._item_input_box, t)
 
-        # ── Shared card style ─────────────────────────────────────────────────
         card_style = f"""
             background: {t['card_bg']};
             border: none;
@@ -265,7 +205,6 @@ class OrderPage(QWidget):
             padding: 10px;
         """
 
-        # ── Shared input style ────────────────────────────────────────────────
         input_style = f"""
             QLineEdit {{
                 background: {t['input_bg']};
@@ -281,7 +220,6 @@ class OrderPage(QWidget):
             }}
         """
 
-        # ── Shared button style ───────────────────────────────────────────────
         button_style = f"""
             color: {t['text']};
             border: none;
@@ -289,30 +227,18 @@ class OrderPage(QWidget):
             background: {t['btn_bg']};
         """
 
-        # ── Customer name card ────────────────────────────────────────────────
+        # Customer card
         self._customer_name_box.setStyleSheet(f"""
-            QFrame#customer_name_box {{
-                {card_style}
-            }}
-            QLabel {{
-                color: {t['text']};
-                background: transparent;
-                border: none;
-            }}
+            QFrame#customer_name_box {{ {card_style} }}
+            QLabel {{ color: {t['text']}; background: transparent; border: none; }}
             {input_style}
-            QLineEdit {{
-                border: none;
-            }}
-            QLineEdit:focus {{
-                border: none;
-            }}
+            QLineEdit {{ border: none; }}
+            QLineEdit:focus {{ border: none; }}
         """)
 
-        # ── Table card ────────────────────────────────────────────────────────
+        # Table card
         self._table.setStyleSheet(f"""
-            QFrame#table_box {{
-                {card_style}
-            }}
+            QFrame#table_box {{ {card_style} }}
         """)
 
         if hasattr(self, '_table_view'):
@@ -325,22 +251,10 @@ class OrderPage(QWidget):
                     border-radius: {r-10}px;
                     padding: 20px 9px 20px 20px;
                 }}
-                QTableView::item {{
-                    border: none;
-                }}
-                QTableView::item:selected {{
-                    background: {t['btn_bg']};
-                    color: {t['text']};
-                }}
-                QTableView::item:selected:!active {{
-                    background: {t['card_bg']};
-                    color: {t['text']};
-                }}
-                QHeaderView{{
-                    background: transparent;
-                    border: none;
-                    color: {t['text']};
-                }}
+                QTableView::item {{ border: none; }}
+                QTableView::item:selected {{ background: {t['btn_bg']}; color: {t['text']}; }}
+                QTableView::item:selected:!active {{ background: {t['card_bg']}; color: {t['text']}; }}
+                QHeaderView {{ background: transparent; border: none; color: {t['text']}; }}
                 QHeaderView#horizontal_header::section {{
                     border-right: 1px solid {t['border']};
                     border-top: 1px solid {t['border']};
@@ -371,14 +285,8 @@ class OrderPage(QWidget):
                 QScrollBar::handle:vertical:hover {{
                     background: {t['text_secondary']};
                 }}
-                QScrollBar::add-line:vertical,
-                QScrollBar::sub-line:vertical {{
-                    height: 0px;
-                }}
-                QScrollBar::add-page:vertical,
-                QScrollBar::sub-page:vertical {{
-                    background: transparent;
-                }}
+                QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; }}
+                QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{ background: transparent; }}
                 QScrollBar:horizontal {{
                     background: transparent;
                     height: 6px;
@@ -390,34 +298,15 @@ class OrderPage(QWidget):
                     min-width: 30px;
                     border-radius: 3px;
                 }}
-                QScrollBar::handle:horizontal:hover {{
-                    background: {t['text_secondary']};
-                }}
-                QScrollBar::add-line:horizontal,
-                QScrollBar::sub-line:horizontal {{
-                    width: 0px;
-                }}
-                QScrollBar::add-page:horizontal,
-                QScrollBar::sub-page:horizontal {{
-                    background: transparent;
-                }}
+                QScrollBar::handle:horizontal:hover {{ background: {t['text_secondary']}; }}
+                QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ width: 0px; }}
+                QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{ background: transparent; }}
             """)
 
-        btn = self._table_view.findChild(QAbstractButton)
-        if btn:
-            btn.setToolTip("TT")
-            print(btn.toolTip())
-
-        # ── Item input card ───────────────────────────────────────────────────
+        # Item input card
         self._item_input_box.setStyleSheet(f"""
-            QFrame#item_box {{
-                {card_style}
-            }}
-            QLabel {{
-                color: {t['text']};
-                background: transparent;
-                border: none;
-            }}
+            QFrame#item_box {{ {card_style} }}
+            QLabel {{ color: {t['text']}; background: transparent; border: none; }}
             {input_style}
             QComboBox {{
                 background: {t['input_bg']};
@@ -427,9 +316,7 @@ class OrderPage(QWidget):
                 padding: 20px;
                 placeholder-text-color: {t['placeholder']};
             }}
-            QComboBox:focus {{
-                border: 1px solid {t['input_border_focus']};
-            }}
+            QComboBox:focus {{ border: 1px solid {t['input_border_focus']}; }}
             QComboBox QLineEdit {{
                 background: transparent;
                 color: {t['text']};
@@ -442,20 +329,10 @@ class OrderPage(QWidget):
                 selection-background-color: {t['btn_hover_bg']};
                 border: 1px solid {t['border']};
             }}
-            QPushButton#submit_btn {{
-                {button_style}
-            }}
-            QPushButton#submit_btn:hover {{
-                background: {t['btn_hover_bg']};
-                color: {t['text']};
-            }}
-            QPushButton#print_btn {{
-                {button_style}
-            }}
-            QPushButton#print_btn:hover {{
-                background: {t['btn_hover_bg']};
-                color: {t['text']};
-            }}
+            QPushButton#submit_btn {{ {button_style} }}
+            QPushButton#submit_btn:hover {{ background: {t['btn_hover_bg']}; color: {t['text']}; }}
+            QPushButton#print_btn {{ {button_style} }}
+            QPushButton#print_btn:hover {{ background: {t['btn_hover_bg']}; color: {t['text']}; }}
             QPushButton#clear_btn {{
                 {button_style}
                 color: {t['close_hover_text']};
@@ -467,26 +344,22 @@ class OrderPage(QWidget):
             }}
         """)
 
+    # ── Shadow helpers ────────────────────────────────────────────────────────
     def set_shadow(self, widget, t: dict):
-        # Core shadow
         widget.shadow = QGraphicsDropShadowEffect(widget)
         widget.shadow.setBlurRadius(3)
         widget.shadow.setOffset(0, 1)
         widget.shadow.setColor(self._parse_color(t["shadow"]))
-
         widget.setGraphicsEffect(widget.shadow)
 
     def set_cast_shadow(self, widget, t: dict):
-        # Core shadow
         widget.shadow = QGraphicsDropShadowEffect(widget)
         widget.shadow.setBlurRadius(12)
         widget.shadow.setOffset(0, 3)
         widget.shadow.setColor(self._parse_color(t["cast_shadow"]))
-
         widget.setGraphicsEffect(widget.shadow)
 
     def _parse_color(self, rgba_str: str) -> QColor:
-        """Parse 'rgba(r, g, b, a)' where a is 0.0-1.0 into QColor."""
         try:
             inner = rgba_str.strip().removeprefix("rgba(").removesuffix(")")
             r, g, b, a = [x.strip() for x in inner.split(",")]
