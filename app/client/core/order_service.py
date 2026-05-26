@@ -161,6 +161,7 @@ class OrderController:
         total = calc_total(qty, price)
 
         table.blockSignals(True)
+        table.setItem(row, 2, make_item(price_text, ALIGN_RIGHT))  # reformat price
         table.setItem(row, 3, make_item(format_price(total), ALIGN_RIGHT))
         table.blockSignals(False)
 
