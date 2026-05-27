@@ -65,6 +65,7 @@ class OrderPage(QWidget):
         # ── Wire up business logic ────────────────────────────────────────────
         self._controller = OrderController(self)
         self._controller.bind()
+        self._controller.restore_state()
 
     # ── Sub-widget builders ───────────────────────────────────────────────────
     def _customer_name_text_box(self) -> QFrame:

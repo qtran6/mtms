@@ -7,8 +7,7 @@ from datetime import datetime
 from pathlib import Path
 
 from PySide6.QtGui import QTextDocument, QPageSize, QPageLayout
-from PySide6.QtPrintSupport import QPrintPreviewDialog, QPrinter, QPrintDialog
-from PySide6.QtWidgets import QWidget
+from PySide6.QtPrintSupport import QPrinter, QPrintDialog
 from PySide6.QtCore import QMarginsF
 
 
@@ -83,22 +82,18 @@ def _build_html(customer: str, rows: list[dict], company: dict) -> str:
     customer_html = ""
     if customer.strip():
         customer_html = f"""
-            <table width="100%" cellpadding="4" cellspacing="0">
+            <table width="100%" cellpadding="1" cellspacing="0" style="margin: 0;">
                 <tr>
-                    <td width="20%" style="font-size: 7pt;">TÊN KH</td>
-                    <td align="center" style="font-size: 14pt;"><b>{customer}</b></td>
-                    <td width="20%"></td>
+                    <td width="15%" style="font-size: 7pt; vertical-align: middle;">TÊN KH</td>
+                    <td align="center" style="font-size: 14pt; vertical-align: middle;"><b>{customer}</b></td>
+                    <td width="15%"></td>
                 </tr>
             </table>
         """
 
-    qr_html = ""
-    if _QR_FILE.exists():
-        qr_html = f'<img src="{_QR_FILE.as_posix()}" width="80" />'
-
     return f"""
-    <html><body style="font-family: 'Segoe UI'; font-size: 7pt; color: #000;">
-        <table width="100%" cellpadding="1" cellspacing="0">
+    <html><body style="font-family: 'Calibri'; font-size: 6pt; color: #000; margin: 0;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0;">
             <tr>
                 <td>
                     <div><b>{company.get('company_name', '')}</b></div>
@@ -108,37 +103,39 @@ def _build_html(customer: str, rows: list[dict], company: dict) -> str:
                     <div><b>{company.get('phone', '')}</b></div>
                     <div><b>{company.get('bank', '')}</b></div>
                 </td>
-                <td align="right" width="100">{qr_html}</td>
             </tr>
         </table>
 
-        <h3 align="center" style="margin: 6px 0;">ĐƠN HÀNG</h3>
+        <div align="center" style="font-size: 10pt; margin: 4px 0;"><b>ĐƠN HÀNG</b></div>
 
         {customer_html}
 
         <div align="right" style="margin: 4px 0;"><b>Ngày: {today}</b></div>
 
-        <table width="100%" border="1" cellpadding="4" cellspacing="0">
-            <tr>
-                <th width="6%" align="center">TT</th>
-                <th>Tên HH</th>
-                <th width="10%" align="center">SL</th>
-                <th width="20%" align="right">ĐƠN GIÁ</th>
-                <th width="22%" align="right">Thành Tiền</th>
-            </tr>
+        <table width="100%" border="1" cellpadding="1" cellspacing="0" style="font-size: 9pt;">
+             <thead style="font-size: 6pt;">
+                <tr>
+                    <th width="3.5%" align="center">TT</th>
+                    <th>Tên HH</th>
+                    <th width="7%" align="center">SL</th>
+                    <th width="14%" align="center">ĐƠN GIÁ</th>
+                    <th width="17%" align="center">Thành Tiền</th>
+                </tr>
+            </thead>
             {rows_html}
         </table>
 
-        <table width="100%" cellpadding="4" cellspacing="0" style="margin-top: 4px;">
+        <table width="100%" cellpadding="4" cellspacing="0" style="margin-top: 4px; font-size: 10pt;">
             <tr>
-                <td align="right" style="font-size: 10pt;"><b>TỔNG CỘNG</b></td>
-                <td align="right" width="22%" style="font-size: 10pt;">
+                <td align="right"><b>TỔNG CỘNG</b></td>
+                <td align="right" width="22%">
                     <b>{grand_total:,}</b>
                 </td>
             </tr>
         </table>
     </body></html>
     """
+
 
 def print_order(parent, customer, table, products):
     company = _load_company_config()
@@ -150,12 +147,15 @@ def print_order(parent, customer, table, products):
 
     html = _build_html(customer.strip(), rows, company)
 
-    doc = QTextDocument()
-    doc.setHtml(html)
-
     printer = QPrinter(QPrinter.PrinterMode.HighResolution)
     printer.setPageSize(QPageSize(QPageSize.PageSizeId.A5))
     printer.setPageMargins(QMarginsF(0, 0, 0, 0), QPageLayout.Unit.Millimeter)
+
+    doc = QTextDocument()
+    doc.setDocumentMargin(0)
+    # Match document page size to printer — disables auto page number footer
+    doc.setPageSize(printer.pageRect(QPrinter.Unit.Point).size())
+    doc.setHtml(html)
 
     dialog = QPrintDialog(printer, parent)
     if dialog.exec() == QPrintDialog.DialogCode.Accepted:

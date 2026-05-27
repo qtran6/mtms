@@ -9,6 +9,7 @@ from PySide6.QtCore import Qt, QTimer, QObject, QEvent
 from PySide6.QtWidgets import QTableWidgetItem
 
 from client.ui.custom_widgets.enter_down_filter import EnterDownFilter
+from client.core.draft_service import save_draft, load_draft
 
 
 # Alignment constants ---------------------------------------------------------------------
@@ -161,7 +162,7 @@ class OrderController:
         total = calc_total(qty, price)
 
         table.blockSignals(True)
-        table.setItem(row, 2, make_item(price_text, ALIGN_RIGHT))  # reformat price
+        table.setItem(row, 2, make_item(format_price(price), ALIGN_RIGHT))  # reformat price
         table.setItem(row, 3, make_item(format_price(total), ALIGN_RIGHT))
         table.blockSignals(False)
 
@@ -206,3 +207,43 @@ class OrderController:
                 if hasattr(obj, "selectAll"):
                     QTimer.singleShot(0, obj.selectAll)
             return False
+
+    def save_state(self):
+        page = self.page
+        table = page._table_view
+
+        rows = []
+        for r in range(table.rowCount()):
+            name_item = table.item(r, 0)
+            if not name_item or not name_item.text().strip():
+                continue
+            rows.append({
+                "name":  name_item.text().strip(),
+                "qty":   table.item(r, 1).text().strip() if table.item(r, 1) else "",
+                "price": table.item(r, 2).text().strip() if table.item(r, 2) else "",
+                "total": table.item(r, 3).text().strip() if table.item(r, 3) else "",
+            })
+
+        save_draft({
+            "customer": page._customer_text_box.text(),
+            "rows": rows,
+        })
+
+    def restore_state(self):
+        data = load_draft()
+        if not data:
+            return
+
+        page = self.page
+        page._customer_text_box.setText(data.get("customer", ""))
+
+        table = page._table_view
+        table.blockSignals(True)
+        for row in data.get("rows", []):
+            r = table.rowCount()
+            table.insertRow(r)
+            table.setItem(r, 0, make_item(row["name"],  ALIGN_LEFT))
+            table.setItem(r, 1, make_item(row["qty"],   ALIGN_CENTER))
+            table.setItem(r, 2, make_item(row["price"], ALIGN_RIGHT))
+            table.setItem(r, 3, make_item(row["total"], ALIGN_RIGHT))
+        table.blockSignals(False)

@@ -143,6 +143,13 @@ class MainWindow(QMainWindow):
         if hasattr(current, "_controller") and hasattr(current._controller, "on_print"):
             current._controller.on_print()
 
+    def closeEvent(self, event):
+        # Save the order draft before closing
+        current = self._content.currentWidget()  # however you track current page
+        if hasattr(current, "_controller") and hasattr(current._controller, "save_state"):
+            current._controller.save_state()
+        super().closeEvent(event)
+
 
 def main():
     app = QApplication(sys.argv)
