@@ -71,11 +71,11 @@ def _build_html(customer: str, rows: list[dict], company: dict) -> str:
         total = r["total"] if r["total"].lower() not in ("nan", "inf") else ""
         rows_html += f"""
             <tr>
-                <td align="center">{i}</td>
-                <td><b>{r['name']}</b></td>
-                <td align="center"><b>{r['qty']}</b></td>
-                <td align="right"><b>{price}</b></td>
-                <td align="right"><b>{total}</b></td>
+                <td align="center" style="padding-top: 6px; padding-bottom: 6px;">{i}</td>
+                <td style="padding-top: 6px; padding-bottom: 6px;"><b>{r['name']}</b></td>
+                <td align="center" style="padding-top: 6px; padding-bottom: 6px;"><b>{r['qty']}</b></td>
+                <td align="right" style="padding-top: 6px; padding-bottom: 6px;"><b>{price}</b></td>
+                <td align="right" style="padding-top: 6px; padding-bottom: 6px;"><b>{total}</b></td>
             </tr>
         """
 
@@ -115,11 +115,11 @@ def _build_html(customer: str, rows: list[dict], company: dict) -> str:
         <table width="100%" border="1" cellpadding="1" cellspacing="0" style="font-size: 9pt;">
              <thead style="font-size: 6pt;">
                 <tr>
-                    <th width="3.5%" align="center">TT</th>
+                    <th width="5%" align="center">TT</th>
                     <th>Tên HH</th>
                     <th width="7%" align="center">SL</th>
-                    <th width="14%" align="center">ĐƠN GIÁ</th>
-                    <th width="17%" align="center">Thành Tiền</th>
+                    <th width="15%" align="center">ĐƠN GIÁ</th>
+                    <th width="18%" align="center">Thành Tiền</th>
                 </tr>
             </thead>
             {rows_html}

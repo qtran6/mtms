@@ -156,12 +156,17 @@ class OrderPage(QWidget):
         btn_layout.addWidget(print_btn,  0, 1)
         btn_layout.addWidget(clear_btn,  1, 1)
 
+        self._grand_total_label = QLabel("Tổng cộng:")
+        self._grand_total_label.setObjectName("grand_total_label")
+        self._grand_total_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+
         for b in (submit_btn, print_btn, clear_btn):
             b.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
         layout.addWidget(brand_input)
         layout.addWidget(model_input)
         layout.addWidget(btn_box)
+        layout.addWidget(self._grand_total_label)
         layout.addStretch(1)
 
         # Store references for OrderController
@@ -366,6 +371,14 @@ class OrderPage(QWidget):
             QPushButton#clear_btn:hover {{
                 background: {t['clear_btn_hover_bg']};
                 color: {t['close_hover_text']};
+            }}
+            QLabel#grand_total_label {{
+                color: {t['text']};
+                font-size: 16pt;
+                font-weight: bold;
+                background: transparent;
+                border: none;
+                padding: 8px;
             }}
         """)
 

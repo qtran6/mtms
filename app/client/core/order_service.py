@@ -109,6 +109,8 @@ class OrderController:
 
         QTimer.singleShot(100, self._reset_model_input)
 
+        self._update_grand_total()
+
     # Clear table ----------------------------------------------------------------
     def on_clear(self):
         page = self.page
@@ -126,6 +128,8 @@ class OrderController:
 
         # Focus back to customer name
         page._customer_text_box.setFocus()
+
+        self._update_grand_total()
 
     # Cell change events -----------------------------------------------------------
     def on_cell_changed(self, row: int, col: int):
@@ -165,6 +169,8 @@ class OrderController:
         table.setItem(row, 2, make_item(format_price(price), ALIGN_RIGHT))  # reformat price
         table.setItem(row, 3, make_item(format_price(total), ALIGN_RIGHT))
         table.blockSignals(False)
+
+        self._update_grand_total()
 
     # Print order ----------------------------------------------------------------
     def on_print(self):
@@ -247,3 +253,16 @@ class OrderController:
             table.setItem(r, 2, make_item(row["price"], ALIGN_RIGHT))
             table.setItem(r, 3, make_item(row["total"], ALIGN_RIGHT))
         table.blockSignals(False)
+
+    def _update_grand_total(self):
+        table = self.page._table_view
+        total = 0
+        for r in range(table.rowCount()):
+            item = table.item(r, 3)
+            if not item:
+                continue
+            try:
+                total += int(item.text().replace(",", ""))
+            except (ValueError, AttributeError):
+                pass
+        self.page._grand_total_label.setText(f"Tổng cộng: {total:,}")
