@@ -1,0 +1,41 @@
+; installer.iss — Inno Setup script for MTMS
+; Open in Inno Setup Compiler and click Build
+
+#define MyAppName       "MTMS"
+#define MyAppVersion    "1.0.0"
+#define MyAppPublisher  "Minh Tan"
+#define MyAppExeName    "MTMS.exe"
+
+[Setup]
+AppId={{D5C9B7E4-1234-5678-9ABC-DEF012345678}
+AppName={#MyAppName}
+AppVersion={#MyAppVersion}
+AppPublisher={#MyAppPublisher}
+DefaultDirName={autopf}\{#MyAppName}
+DefaultGroupName={#MyAppName}
+DisableProgramGroupPage=yes
+OutputBaseFilename=MTMS-Setup-{#MyAppVersion}
+SetupIconFile=client\assets\MT.ico
+Compression=lzma
+SolidCompression=yes
+WizardStyle=modern
+UninstallDisplayIcon={app}\{#MyAppExeName}
+PrivilegesRequired=lowest
+
+[Languages]
+Name: "english"; MessagesFile: "compiler:Default.isl"
+
+[Tasks]
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+
+[Files]
+; Bundle everything from PyInstaller's output folder
+Source: "dist\MTMS\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+[Icons]
+Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
+Name: "{group}\Uninstall {#MyAppName}"; Filename: "{uninstallexe}"
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+
+[Run]
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent

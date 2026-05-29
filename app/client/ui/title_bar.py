@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt, QPoint
-from PySide6.QtWidgets import QLabel, QStyle, QToolButton, QWidget, QHBoxLayout, QPushButton, QSizePolicy, QMainWindow
+from PySide6.QtWidgets import QToolButton, QWidget, QHBoxLayout, QPushButton, QSizePolicy, QMainWindow
 
 # ── Title bar ─────────────────────────────────────────────────────────────────
 class TitleBar(QWidget):
@@ -11,9 +11,7 @@ class TitleBar(QWidget):
         self._window = window
         self.setFixedHeight(self.HEIGHT)
 
-        self._icon = QLabel()
-        icon = self.style().standardIcon(QStyle.SP_ComputerIcon)
-        self._icon.setPixmap(icon.pixmap(16, 16))
+        # no icon widget in title bar; application icon is set at app level
 
         self._drag_pos = QPoint()
 
@@ -30,7 +28,6 @@ class TitleBar(QWidget):
         self._btn_close.setCursor(Qt.CursorShape.PointingHandCursor)
         self._btn_close.clicked.connect(self._window.close)
 
-        # layout.addWidget(self._icon)
         layout.addWidget(spacer)
         layout.addWidget(self._btn_close)
 

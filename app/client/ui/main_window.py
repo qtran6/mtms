@@ -5,7 +5,13 @@ from PySide6.QtWidgets import (
     QPushButton, QSizePolicy
 )
 from PySide6.QtCore import Qt, QTimer, QPoint, QRect, QEvent
-from PySide6.QtGui import QFontDatabase, QKeySequence, QPalette, QColor, QPainter, QBrush, QPainterPath, QPen, QShortcut
+from PySide6.QtGui import (
+    QFontDatabase, QKeySequence, QPalette, 
+    QColor, QPainter, QBrush, 
+    QPainterPath, QPen, QShortcut, QIcon
+)
+
+from pathlib import Path
 
 from client.core.theme import load_theme
 from client.ui.pages import *
@@ -16,12 +22,17 @@ RADIUS = 12
 BORDER = 2
 SHADOW = 10
 RESTORE_SIZE = (1280, 720)
+ICON_PATH = Path(__file__).parent.parent / "assets" / "MT.ico"
+
+if not ICON_PATH.exists():
+    print(f"[icon] Not found: {ICON_PATH}")
 
 # ── Main window ───────────────────────────────────────────────────────────────
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Toa Hang")
+        self.setWindowIcon(QIcon(str(ICON_PATH)))
         self.setMinimumSize(960, 600)
         self.resize(*RESTORE_SIZE)
 
@@ -153,6 +164,7 @@ class MainWindow(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon(str(ICON_PATH)))
     app.setStyle("Fusion")
     window = MainWindow()
     window.show()
