@@ -1,4 +1,3 @@
-from .loop_back_filter import LoopBackOnTab
-from .enter_down_filter import EnterDownFilter
+from .event_filters import LoopBackOnTab, EnterDownFilter, DeleteCellFilter
 
-__all__ = ["LoopBackOnTab", "EnterDownFilter"]
+__all__ = ["LoopBackOnTab", "EnterDownFilter", "DeleteCellFilter"]

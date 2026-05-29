@@ -92,7 +92,7 @@ class OrderPage(QWidget):
 
         table = QTableWidget(0, 4)
         table.setObjectName("table_view")
-        table.setHorizontalHeaderLabels(["Tên HH", "Số lượng", "Đơn giá", "Thành tiền"])
+        table.setHorizontalHeaderLabels(["Tên HH", "SL", "Đơn giá", "Thành tiền"])
 
         table.horizontalHeader().setObjectName("horizontal_header")
         h_header = table.horizontalHeader()
@@ -104,6 +104,7 @@ class OrderPage(QWidget):
         table.verticalHeader().setObjectName("vertical_header")
         table.verticalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
         table.verticalHeader().setMinimumWidth(40)
+        table.verticalHeader().setDefaultSectionSize(70)
 
         table.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
         table.setShowGrid(True)

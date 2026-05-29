@@ -4,10 +4,10 @@
     "close_hover_text": "#ffffff",
     "radius":           30,
     "border_width":     2,
-    "font":             "Segoe UI Bold",
-    "header_font":      "Segoe UI Semibold",
+    "font":             "Calibri Bold",
+    "header_font":      "Calibri Bold",
     "header_size":      20,
-    "font_size":        27
+    "font_size":        25
   },
   "dark": {
     "background":       "#1a1a1f",

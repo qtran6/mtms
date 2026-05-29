@@ -8,7 +8,7 @@ holds references to the widgets and wires up callbacks.
 from PySide6.QtCore import Qt, QTimer, QObject, QEvent
 from PySide6.QtWidgets import QTableWidgetItem
 
-from client.ui.custom_widgets.enter_down_filter import EnterDownFilter
+from client.ui.custom_widgets.event_filters import *
 from client.core.draft_service import save_draft, load_draft
 
 
@@ -63,6 +63,8 @@ class OrderController:
         page._print_btn.clicked.connect(self.on_print)
         self._enter_down_filter = EnterDownFilter(self.page)
         self.page._table_view.installEventFilter(self._enter_down_filter)
+        self._delete_filter = DeleteCellFilter(self.page)
+        self.page._table_view.installEventFilter(self._delete_filter)
 
     # Brand changed: refill name combo
     def on_brand_changed(self, text: str):
@@ -253,6 +255,8 @@ class OrderController:
             table.setItem(r, 2, make_item(row["price"], ALIGN_RIGHT))
             table.setItem(r, 3, make_item(row["total"], ALIGN_RIGHT))
         table.blockSignals(False)
+
+        self._update_grand_total()
 
     def _update_grand_total(self):
         table = self.page._table_view
