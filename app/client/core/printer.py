@@ -279,5 +279,6 @@ def print_order(parent, customer, table, products):
     doc.build(story)
 
     # _open_pdf(pdf_path)
-    _send_to_printer(pdf_path)
+    # _send_to_printer(pdf_path)
     # _open_with_print_dialog(pdf_path)
+    return pdf_path

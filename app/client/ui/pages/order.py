@@ -12,7 +12,6 @@ from PySide6.QtWidgets import (
     QApplication,
     QHeaderView,
     QComboBox,
-    QGraphicsDropShadowEffect,
 )
 from PySide6.QtGui import QColor
 from PySide6.QtCore import Qt, Signal
@@ -208,10 +207,10 @@ class OrderPage(QWidget):
         self.setStyleSheet("background: transparent;")
 
         # Shadows
-        self.set_shadow(self, t)
-        self.set_cast_shadow(self._customer_name_box, t)
-        self.set_cast_shadow(self._left_column, t)
-        self.set_cast_shadow(self._item_input_box, t)
+        apply_shadow(self, t)
+        apply_cast_shadow(self._customer_name_box, t)
+        apply_cast_shadow(self._left_column, t)
+        apply_cast_shadow(self._item_input_box, t)
 
         card_style = f"""
             background: {t['card_bg']};
@@ -310,7 +309,7 @@ class OrderPage(QWidget):
                     border-radius: 3px;
                 }}
                 QScrollBar::handle:vertical {{
-                    background: {t['border']};
+                    background: {t['placeholder']};
                     min-height: 20px;
                     border-radius: 3px;
                 }}
@@ -428,31 +427,6 @@ class OrderPage(QWidget):
                 padding: 8px;
             }}
         """)
-
-    # ── Shadow helpers ────────────────────────────────────────────────────────
-    def set_shadow(self, widget, t: dict):
-        widget.shadow = QGraphicsDropShadowEffect(widget)
-        widget.shadow.setBlurRadius(3)
-        widget.shadow.setOffset(0, 1)
-        widget.shadow.setColor(self._parse_color(t["shadow"]))
-        widget.setGraphicsEffect(widget.shadow)
-
-    def set_cast_shadow(self, widget, t: dict):
-        widget.shadow = QGraphicsDropShadowEffect(widget)
-        widget.shadow.setBlurRadius(12)
-        widget.shadow.setOffset(0, 3)
-        widget.shadow.setColor(self._parse_color(t["cast_shadow"]))
-        widget.setGraphicsEffect(widget.shadow)
-
-    def _parse_color(self, rgba_str: str) -> QColor:
-        try:
-            inner = rgba_str.strip().removeprefix("rgba(").removesuffix(")")
-            r, g, b, a = [x.strip() for x in inner.split(",")]
-            color = QColor(int(r), int(g), int(b))
-            color.setAlphaF(float(a))
-            return color
-        except Exception:
-            return QColor(0, 0, 0, 80)
         
 class TabButton(QWidget):
     """A tab with a numeric label and a small ✕ close button."""

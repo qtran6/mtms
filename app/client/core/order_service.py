@@ -169,15 +169,30 @@ class OrderController:
         self._update_grand_total()
 
     # ── Print ─────────────────────────────────────────────────────────────────
+    # def on_print(self):
+    #     from client.core.printer import print_order
+    #     page = self.page
+    #     print_order(
+    #         parent=page,
+    #         customer=page._customer_text_box.text(),
+    #         table=page._table_view,
+    #         products=page._products,
+    #     )
+
     def on_print(self):
         from client.core.printer import print_order
         page = self.page
-        print_order(
+        pdf_path = print_order(
             parent=page,
             customer=page._customer_text_box.text(),
             table=page._table_view,
             products=page._products,
         )
+        if pdf_path:
+            # Walk up to main window to show preview
+            window = page.window()
+            if hasattr(window, "show_print_preview"):
+                window.show_print_preview(pdf_path)
 
     # ── Grand total ───────────────────────────────────────────────────────────
     def _update_grand_total(self):

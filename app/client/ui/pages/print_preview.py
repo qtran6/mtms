@@ -67,7 +67,7 @@ class PrintPreviewPage(QWidget):
         self._print_btn = QPushButton("In")
         self._print_btn.setObjectName("preview_print_btn")
         self._print_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self._print_btn.setMinimumHeight(60)
+        self._print_btn.setMinimumHeight(100)
         self._print_btn.clicked.connect(self._on_print)
         # This is the default button — Enter triggers it
         self._print_btn.setDefault(True)
@@ -219,7 +219,7 @@ class PrintPreviewPage(QWidget):
                 color: {t['text']};
                 border: none;
                 border-radius: 6px;
-                font-size: 18pt;
+                font-size: 26pt;
                 font-weight: bold;
             }}
             QPushButton#preview_print_btn:hover {{

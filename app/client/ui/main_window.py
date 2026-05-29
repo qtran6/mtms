@@ -39,6 +39,7 @@ class MainWindow(QMainWindow):
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
+        # State
         self._last_dark = None
         self._maximized = False
         self._theme     = {}
@@ -52,12 +53,19 @@ class MainWindow(QMainWindow):
         root_layout.setContentsMargins(0, 0, 0, 0)
         root_layout.setSpacing(0)
 
+        # Custom title bar
         self._title_bar = TitleBar(self)
         root_layout.addWidget(self._title_bar)
 
+        # Content area with stacked pages
         self._content = QStackedWidget()
         self._order_page = OrderPage()
+        self._print_preview_page = PrintPreviewPage()
+        self._print_preview_page.print_requested.connect(self._on_print_requested)
+        self._print_preview_page.cancelled.connect(self._on_preview_cancelled)
+
         self._content.addWidget(self._order_page)
+        self._content.addWidget(self._print_preview_page)
         self._content.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
         )
@@ -139,6 +147,7 @@ class MainWindow(QMainWindow):
 
         self._title_bar.apply_theme(t)
         self._order_page.apply_theme(t)
+        self._print_preview_page.apply_theme(t)
         self._content.setStyleSheet("background: transparent;")
         self.centralWidget().setStyleSheet("#root { background: transparent; }")
 
@@ -160,6 +169,37 @@ class MainWindow(QMainWindow):
         if hasattr(current, "_controller") and hasattr(current._controller, "save_state"):
             current._controller.save_state()
         super().closeEvent(event)
+
+    def show_print_preview(self, pdf_path: str):
+        """Switch to the preview page and load a PDF."""
+        self._print_preview_page.load_pdf(pdf_path)
+        self._content.setCurrentWidget(self._print_preview_page)
+
+    def _on_print_requested(self, pdf_path: str, printer_name: str, copies: int):
+        import subprocess
+        sumatra = Path(__file__).parent.parent.parent / "data" / "SumatraPDF.exe"
+        
+        if not sumatra.exists():
+            print(f"[print] SumatraPDF not found at: {sumatra}")
+            self._content.setCurrentWidget(self._order_page)
+            return
+        
+        print(f"[print] Printing to '{printer_name}' x{copies}")
+        result = subprocess.run([
+            str(sumatra),
+            "-print-to", printer_name,
+            "-silent",
+            "-print-settings", f"{copies}x",
+            pdf_path,
+        ], capture_output=True, text=True)
+        
+        if result.returncode != 0:
+            print(f"[print] SumatraPDF failed: {result.stderr}")
+        
+        self._content.setCurrentWidget(self._order_page)
+
+    def _on_preview_cancelled(self):
+        self._content.setCurrentWidget(self._order_page)
 
 
 def main():
