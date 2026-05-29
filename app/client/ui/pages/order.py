@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
     QGraphicsDropShadowEffect,
 )
 from PySide6.QtGui import QColor
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 
 from client.core.completer import combo_completer
 from client.core.data_loader import load_products
@@ -40,6 +40,7 @@ class OrderPage(QWidget):
 
         self._customer_name_box = self._customer_name_text_box()
         self._table = self._createTable()
+        self._tab_bar = self._create_tab_bar()
         self._item_input_box = self._addItemUI()
 
         self._left_column = QWidget()
@@ -49,6 +50,7 @@ class OrderPage(QWidget):
         left_layout.setSpacing(18)
         left_layout.addWidget(self._customer_name_box)
         left_layout.addWidget(self._table)
+        left_layout.addWidget(self._tab_bar)
         left_layout.setStretch(0, 0)
         left_layout.setStretch(1, 1)
 
@@ -114,6 +116,15 @@ class OrderPage(QWidget):
         self._table_view = table
 
         return table_box
+
+    def _create_tab_bar(self) -> QWidget:
+        bar = QWidget()
+        bar.setObjectName("tab_bar")
+        self._tab_layout = QHBoxLayout(bar)
+        self._tab_layout.setContentsMargins(0, 4, 0, 0)
+        self._tab_layout.setSpacing(4)
+        self._tab_layout.addStretch(1)
+        return bar
 
     def _addItemUI(self) -> QFrame:
         box = QFrame()
@@ -334,6 +345,41 @@ class OrderPage(QWidget):
                 }}
             """)
 
+        # Tab bar
+        self._tab_bar.setStyleSheet(f"""
+            QWidget#tab_btn {{
+                background: {t['card_bg']};
+                border-radius: 6px;
+            }}
+            QWidget#tab_btn[active="true"] {{
+                background: {t['btn_bg']};
+            }}
+            QWidget#tab_btn QLabel {{
+                color: {t['text']};
+                background: transparent;
+                padding: 2px 4px;
+            }}
+            QPushButton#tab_close_btn {{
+                background: transparent;
+                color: {t['text']};
+                border: none;
+                font-size: 11pt;
+            }}
+            QPushButton#tab_close_btn:hover {{
+                color: {t['close_hover_text']};
+            }}
+            QPushButton#tab_plus_btn {{
+                background: {t['btn_bg']};
+                color: {t['text']};
+                border: none;
+                border-radius: 14px;
+                font-size: 14pt;
+            }}
+            QPushButton#tab_plus_btn:hover {{
+                background: {t['btn_hover_bg']};
+            }}
+        """)
+
         # Item input card
         self._item_input_box.setStyleSheet(f"""
             QFrame#item_box {{ {card_style} }}
@@ -407,3 +453,40 @@ class OrderPage(QWidget):
             return color
         except Exception:
             return QColor(0, 0, 0, 80)
+        
+class TabButton(QWidget):
+    """A tab with a numeric label and a small ✕ close button."""
+    clicked = Signal()
+    closed  = Signal()
+
+    def __init__(self, number: int, parent=None):
+        super().__init__(parent)
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(8, 4, 4, 4)
+        layout.setSpacing(6)
+
+        self._label = QLabel(str(number))
+        self._close = QPushButton("✕")
+        self._close.setFixedSize(16, 16)
+        self._close.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._close.setObjectName("tab_close_btn")
+
+        layout.addWidget(self._label)
+        layout.addWidget(self._close)
+
+        self._close.clicked.connect(self.closed.emit)
+
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setObjectName("tab_btn")
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.clicked.emit()
+        super().mousePressEvent(event)
+
+    def set_active(self, active: bool):
+        self.setProperty("active", "true" if active else "false")
+        self.style().unpolish(self)
+        self.style().polish(self)

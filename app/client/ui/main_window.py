@@ -21,7 +21,7 @@ RESTORE_SIZE = (1280, 720)
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Inventory Manager")
+        self.setWindowTitle("Toa Hang")
         self.setMinimumSize(960, 600)
         self.resize(*RESTORE_SIZE)
 

@@ -84,7 +84,7 @@ def _draw_title_and_meta(canvas, y, customer, today, page_width):
     canvas.drawCentredString(page_width / 2, y, "ĐƠN HÀNG")
 
     if customer:
-        y -= 14
+        y -= 16
         canvas.setFont(_FONT_REGULAR, 8)
         canvas.drawString(x, y - 2, "TÊN KH")
         canvas.setFont(_FONT_BOLD, 20)
@@ -176,7 +176,7 @@ def _build_table(rows: list[dict], grand_total: int) -> Table:
 
         # TỔNG CỘNG row ----------------------------------------------------
         ("FONTNAME",   (3, -1), (-1, -1), _FONT_BOLD),
-        ("FONTSIZE",   (3, -1), (-1, -1), 11),
+        ("FONTSIZE",   (3, -1), (-1, -1), 14),
         ("TOPPADDING", (0, -1), (-1, -1), 6),
     ])
     t.setStyle(style)
