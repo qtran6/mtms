@@ -14,6 +14,7 @@ import json
 import os
 import tempfile
 import platform
+import subprocess
 from datetime import datetime
 from pathlib import Path
 
@@ -185,6 +186,7 @@ def _build_table(rows: list[dict], grand_total: int) -> Table:
 
 # ── Output ───────────────────────────────────────────────────────────────────────
 def _open_pdf(pdf_path: str):
+    """Open the PDF in the default viewer so user can preview and print."""
     try:
         system = platform.system()
         if system == "Windows":
@@ -195,6 +197,30 @@ def _open_pdf(pdf_path: str):
             os.system(f'xdg-open "{pdf_path}"')
     except Exception as e:
         print(f"[printer] Could not open PDF: {e}")
+
+def _send_to_printer(pdf_path: str):
+    """Send the PDF directly to the default printer (no dialog)."""
+    try:
+        system = platform.system()
+        if system == "Windows":
+            os.startfile(pdf_path, "print")
+        elif system == "Darwin":
+            os.system(f'lpr "{pdf_path}"')
+        else:  # Linux
+            os.system(f'lp "{pdf_path}"')
+    except Exception as e:
+        print(f"[printer] Could not send to printer: {e}")
+
+def _open_with_print_dialog(pdf_path: str):
+    sumatra = Path(__file__).parent.parent.parent / "data" / "SumatraPDF.exe"
+    
+    try:
+        if sumatra.exists() and platform.system() == "Windows":
+            subprocess.run([str(sumatra), "-print-dialog", pdf_path])
+        else:
+            _open_pdf(pdf_path)
+    except Exception as e:
+        print(f"[printer] Could not open print dialog: {e}")
 
 
 def print_order(parent, customer, table, products):
@@ -252,4 +278,6 @@ def print_order(parent, customer, table, products):
     ]
     doc.build(story)
 
-    _open_pdf(pdf_path)
+    # _open_pdf(pdf_path)
+    _send_to_printer(pdf_path)
+    # _open_with_print_dialog(pdf_path)

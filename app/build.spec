@@ -11,6 +11,11 @@ block_cipher = None
 ROOT = Path(SPECPATH)
 
 # Data files to bundle alongside the .exe
+data_files = []
+for f in (ROOT / "data").iterdir():
+    if f.is_file() and f.name != "draft.json":
+        data_files.append((str(f), "data"))
+        
 # Format: (source_path_on_disk, destination_folder_in_bundle)
 datas = [
     (str(ROOT / "data"),                       "data"),
@@ -41,7 +46,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name="MTMS",
+    name="Toa Hang",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

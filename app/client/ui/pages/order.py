@@ -366,7 +366,7 @@ class OrderPage(QWidget):
                 font-size: 11pt;
             }}
             QPushButton#tab_close_btn:hover {{
-                color: {t['close_hover_text']};
+                color: {t['placeholder']};
             }}
             QPushButton#tab_plus_btn {{
                 background: {t['btn_bg']};
