@@ -6,3 +6,6 @@ PySide6==6.11.1
 
 # ── Packaging (dev only, not bundled into the .exe) ───────────────
 # pyinstaller==6.9.0
+
+# ── Printing ──────────────────────────────────────────────────────
+reportlab>=4.0
