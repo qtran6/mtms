@@ -6,8 +6,6 @@ Layout:
 - Right column: rendered preview of the PDF
 """
 
-import platform
-import os
 from pathlib import Path
 
 from PySide6.QtWidgets import (
@@ -19,6 +17,8 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPixmap, QImage
 from PySide6.QtPdf import QPdfDocument
 from PySide6.QtPrintSupport import QPrinterInfo
+
+from client.ui.custom_widgets import *
 
 
 class PrintPreviewPage(QWidget):
@@ -195,6 +195,12 @@ class PrintPreviewPage(QWidget):
     # ── Theme ─────────────────────────────────────────────────────────────────
     def apply_theme(self, t: dict):
         r = t.get("radius", 12)
+
+        # Shadows
+        apply_shadow(self._settings_panel, t)
+        apply_cast_shadow(self._settings_panel, t)
+        apply_shadow(self._preview_panel, t)
+        apply_cast_shadow(self._preview_panel, t)
 
         card_style = f"""
             background: {t['card_bg']};

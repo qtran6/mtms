@@ -145,6 +145,51 @@ class MainWindow(QMainWindow):
         app_font = QFont(t['font'], t['font_size'])
         QApplication.setFont(app_font)
 
+        # Global scrollbar style — applies everywhere
+        r = t.get("radius", 12)
+        QApplication.instance().setStyleSheet(f"""
+            QScrollBar:vertical {{
+                background: transparent;
+                width: 11px;
+                margin: {r}px 0px {r}px 3px;
+                border-radius: 3px;
+            }}
+            QScrollBar::handle:vertical {{
+                background: {t['placeholder']};
+                min-height: 20px;
+                border-radius: 3px;
+            }}
+            QScrollBar::handle:vertical:hover {{
+                background: {t['text_secondary']};
+            }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
+                height: 0px;
+            }}
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
+                background: transparent;
+            }}
+            QScrollBar:horizontal {{
+                background: transparent;
+                height: 6px;
+                margin: 0px;
+                border-radius: 3px;
+            }}
+            QScrollBar::handle:horizontal {{
+                background: {t['placeholder']};
+                min-width: 30px;
+                border-radius: 3px;
+            }}
+            QScrollBar::handle:horizontal:hover {{
+                background: {t['text_secondary']};
+            }}
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
+                width: 0px;
+            }}
+            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{
+                background: transparent;
+            }}
+        """)
+
         self._title_bar.apply_theme(t)
         self._order_page.apply_theme(t)
         self._print_preview_page.apply_theme(t)

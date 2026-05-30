@@ -302,46 +302,6 @@ class OrderPage(QWidget):
                     color: {t['text']};
                     border: 1px solid {t['border']};
                 }}
-                QScrollBar:vertical {{
-                    background: transparent;
-                    width: 11px;
-                    margin: {r}px 0px {r}px 3px;
-                    border-radius: 3px;
-                }}
-                QScrollBar::handle:vertical {{
-                    background: {t['placeholder']};
-                    min-height: 20px;
-                    border-radius: 3px;
-                }}
-                QScrollBar::handle:vertical:hover {{
-                    background: {t['text_secondary']};
-                }}
-                QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ 
-                    height: 0px;
-                }}
-                QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{ 
-                    background: transparent;
-                }}
-                QScrollBar:horizontal {{
-                    background: transparent;
-                    height: 6px;
-                    margin: 0px;
-                    border-radius: 3px;
-                }}
-                QScrollBar::handle:horizontal {{
-                    background: {t['border']};
-                    min-width: 30px;
-                    border-radius: 3px;
-                }}
-                QScrollBar::handle:horizontal:hover {{ 
-                    background: {t['text_secondary']};
-                }}
-                QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ 
-                    width: 0px;
-                }}
-                QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{ 
-                    background: transparent; 
-                }}
             """)
 
         # Tab bar
