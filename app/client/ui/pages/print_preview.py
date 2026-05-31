@@ -37,6 +37,7 @@ class PrintPreviewPage(QWidget):
         self._pdf_path: str | None = None
         self._pdf_doc = QPdfDocument(self)
         self._page_pixmaps: list[QPixmap] = []
+        self._theme: dict = {}
 
         self._build_ui()
 
@@ -48,7 +49,7 @@ class PrintPreviewPage(QWidget):
 
         # Left settings panel
         self._settings_panel = self._build_settings_panel()
-        self._settings_panel.setFixedWidth(280)
+        self._settings_panel.setFixedWidth(400)
 
         # Right preview panel
         self._preview_panel = self._build_preview_panel()
@@ -165,23 +166,31 @@ class PrintPreviewPage(QWidget):
         self._page_pixmaps = []
 
     def _render_pages(self):
-        # Render each page at ~150 DPI for smooth preview
-        # PDF page size is in points; 1 inch = 72 points; 150 DPI → 150/72 = ~2.08x
-        scale = 2.0
+        target_width = 500
+
         for i in range(self._pdf_doc.pageCount()):
             point_size = self._pdf_doc.pagePointSize(i)
-            target_w = int(point_size.width()  * scale)
-            target_h = int(point_size.height() * scale)
-            from PySide6.QtCore import QSize
-            image = self._pdf_doc.render(i, QSize(target_w, target_h))
+            aspect = point_size.height() / point_size.width()
+            target_h = int(target_width * aspect)
 
+            from PySide6.QtCore import QSize
+            # Render at 4x display size for sharp text
+            image = self._pdf_doc.render(i, QSize(target_width * 4, target_h * 4))
             pix = QPixmap.fromImage(image)
+            # Display at target_width — still sharp because pixmap is 4x oversampled
+            pix = pix.scaled(
+                target_width, target_h,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation,
+            )
             self._page_pixmaps.append(pix)
 
             label = QLabel()
             label.setPixmap(pix)
             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             label.setObjectName("preview_page")
+            if self._theme:
+                apply_cast_shadow(label, self._theme)
             self._pages_layout.addWidget(label)
 
     # ── Slot ──────────────────────────────────────────────────────────────────
@@ -194,6 +203,7 @@ class PrintPreviewPage(QWidget):
 
     # ── Theme ─────────────────────────────────────────────────────────────────
     def apply_theme(self, t: dict):
+        self._theme = t
         r = t.get("radius", 12)
 
         # Shadows

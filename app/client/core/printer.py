@@ -252,9 +252,8 @@ def print_order(parent, customer, table, products):
     doc.customer = customer.strip()
     doc.today    = datetime.now().strftime("%d/%m/%Y")
 
-    # First page reserves more vertical space at the top for company info
-    first_frame_height = A5[1] - 40 * mm - doc.bottomMargin
-    later_frame_height = A5[1] - 25 * mm - doc.bottomMargin
+    first_frame_height = A5[1] - (40 * mm) - doc.bottomMargin
+    later_frame_height = A5[1] - (23 * mm) - doc.bottomMargin
 
     first_frame = Frame(
         doc.leftMargin, doc.bottomMargin,
@@ -272,13 +271,29 @@ def print_order(parent, customer, table, products):
         PageTemplate(id="later", frames=[later_frame], onPage=_draw_later_page_header),
     ])
 
-    story = [
-        NextPageTemplate("later"),  # any subsequent page uses 'later'
-        _build_table(rows, grand_total),
-    ]
-    doc.build(story)
+    story = [NextPageTemplate("later")]
 
-    # _open_pdf(pdf_path)
-    # _send_to_printer(pdf_path)
-    # _open_with_print_dialog(pdf_path)
+    # If TỔNG CỘNG would orphan, push content down 20mm to pull a row to the last page
+    if _estimate_orphan(len(rows)):
+        from reportlab.platypus import Spacer
+        story.append(Spacer(1, 8 * mm))
+
+    story.append(_build_table(rows, grand_total))
+
+    doc.build(story)
     return pdf_path
+
+def _estimate_orphan(row_count: int) -> bool:
+    """Estimate if TỔNG CỘNG would end up alone on the last page."""
+    rows_per_first_page = 15
+    rows_per_later_page = 16
+
+    if row_count == rows_per_first_page:
+        return True
+
+    if row_count <= rows_per_first_page:
+        return False
+
+    remaining = row_count - rows_per_first_page
+    last_page_rows = remaining % rows_per_later_page
+    return last_page_rows == 0

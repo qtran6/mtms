@@ -26,10 +26,14 @@ class OrderPage(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        # ── Load data ─────────────────────────────────────────────────────────
+        # Load data 
         self._products = load_products()
         self._brands = list(dict.fromkeys(p["brand"] for p in self._products))
 
+        self._build_ui()
+
+    # Build UI
+    def _build_ui(self):
         # ── Page layout ───────────────────────────────────────────────────────
         self.setFocusPolicy(Qt.ClickFocus)
         self._grid = QGridLayout(self)
