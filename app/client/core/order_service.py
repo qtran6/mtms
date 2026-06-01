@@ -75,6 +75,7 @@ class OrderController:
         page._print_btn.clicked.connect(self.on_print)
         page._table_view.installEventFilter(self._enter_down_filter)
         page._table_view.installEventFilter(self._delete_filter)
+        page._duplicate_tab_btn.clicked.connect(self._duplicate_current_tab)
 
     # ── Brand changed ─────────────────────────────────────────────────────────
     def on_brand_changed(self, text: str):
@@ -91,12 +92,15 @@ class OrderController:
         page = self.page
         brand = page._brand_input.currentText().strip()
         name  = page._model_input.currentText().strip()
-        if not brand or not name:
-            return
+
+        if not name:
+            return  # name is required
 
         product = find_product(page._products, brand, name)
+
+        # If not found in catalog, allow as custom item with empty price
         if not product:
-            return
+            product = {"brand": brand, "name": name, "price": 0}
 
         if self._is_duplicate(product["name"]):
             QTimer.singleShot(100, self._reset_model_input)
@@ -108,12 +112,21 @@ class OrderController:
             target_row = table.rowCount()
             table.insertRow(target_row)
 
+        # If custom item (price is 0), leave price cell empty so user can fill in
+        price_text = format_price(product["price"]) if product["price"] > 0 else ""
+
         table.blockSignals(True)
         table.setItem(target_row, 0, make_item(product["name"], ALIGN_LEFT))
         table.setItem(target_row, 1, make_item("", ALIGN_CENTER))
-        table.setItem(target_row, 2, make_item(format_price(product["price"]), ALIGN_RIGHT))
+        table.setItem(target_row, 2, make_item(price_text, ALIGN_RIGHT))
         table.setItem(target_row, 3, make_item("", ALIGN_RIGHT))
         table.blockSignals(False)
+
+        # Scroll the table to show the new row
+        table.setCurrentCell(target_row, 0)
+
+        # Highlight the new row with a fading animation
+        flash_row(table, target_row)
 
         self._update_grand_total()
         QTimer.singleShot(100, self._reset_model_input)
@@ -154,6 +167,8 @@ class OrderController:
         try:
             qty = int(qty_text)
             price = float(price_text.replace(",", ""))
+            if price < 5000:
+                price = price * 1000
         except ValueError:
             table.blockSignals(True)
             table.setItem(row, 3, make_item("", ALIGN_RIGHT))
@@ -351,6 +366,18 @@ class OrderController:
         layout.addStretch(1)
         page._tab_bar.update()
         page._left_column.update()
+
+    def _duplicate_current_tab(self):
+        """Copy the current tab into a new tab (always uses default numbering)."""
+        if self._tabs:
+            self._tabs[self._active_tab] = self._capture_current_state()
+        import copy
+        copied = copy.deepcopy(self._tabs[self._active_tab])
+        copied["name"] = ""   # force default numbering on the copy
+        self._tabs.append(copied)
+        self._active_tab = len(self._tabs) - 1
+        self._apply_state(self._tabs[self._active_tab])
+        self._refresh_tab_bar()
 
     # ── State save/restore (multi-tab) ────────────────────────────────────────
     def save_state(self):

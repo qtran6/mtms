@@ -179,6 +179,7 @@ def _build_table(rows: list[dict], grand_total: int) -> Table:
         ("FONTNAME",   (3, -1), (-1, -1), _FONT_BOLD),
         ("FONTSIZE",   (3, -1), (-1, -1), 14),
         ("TOPPADDING", (0, -1), (-1, -1), 6),
+        ("RIGHTPADDING", (3, -1), (3, -1), 12),
     ])
     t.setStyle(style)
     return t

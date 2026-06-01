@@ -116,8 +116,17 @@ class OrderPage(QWidget):
 
         table_layout.addWidget(table)
 
-        self._table_view = table
+        # Duplicate tab button — bottom-right of the table card
+        btn_row = QHBoxLayout()
+        btn_row.addStretch(1)
+        self._duplicate_tab_btn = QPushButton("+")
+        self._duplicate_tab_btn.setObjectName("duplicate_tab_btn")
+        self._duplicate_tab_btn.setFixedSize(32, 32)
+        self._duplicate_tab_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_row.addWidget(self._duplicate_tab_btn)
+        table_layout.addLayout(btn_row)
 
+        self._table_view = table
         return table_box
 
     def _create_tab_bar(self) -> QWidget:
@@ -257,6 +266,19 @@ class OrderPage(QWidget):
         # Table card
         self._table.setStyleSheet(f"""
             QFrame#table_box {{ {card_style} }}
+            QPushButton#duplicate_tab_btn {{
+                background: {t['btn_bg']};
+                color: {t['text']};
+                border: none;
+                border-radius: 16px;
+                font-size: 14pt;
+                font-weight: bold;
+                text-align: center;
+                padding-bottom: 3;
+            }}
+            QPushButton#duplicate_tab_btn:hover {{
+                background: {t['btn_hover_bg']};
+            }}
         """)
 
         if hasattr(self, '_table_view'):
