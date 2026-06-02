@@ -3,7 +3,7 @@ filters.py — event filters used by the Order page.
 """
 
 from PySide6.QtCore import QObject, QEvent, Qt, QTimer
-from PySide6.QtWidgets import QComboBox, QAbstractItemView
+from PySide6.QtWidgets import QComboBox, QAbstractItemView, QScrollArea
 
 
 class LoopBackOnTab(QObject):
@@ -57,3 +57,15 @@ class DeleteCellFilter(QObject):
                     item.setText("")
             return True
         return False
+    
+class HorizontalScrollArea(QScrollArea):
+    """QScrollArea where mouse wheel scrolls horizontally instead of vertically."""
+    
+    def wheelEvent(self, event):
+        delta = event.angleDelta().y()
+        if delta:
+            bar = self.horizontalScrollBar()
+            bar.setValue(bar.value() - delta)
+            event.accept()
+        else:
+            super().wheelEvent(event)
