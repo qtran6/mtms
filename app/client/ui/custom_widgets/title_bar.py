@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QToolButton, QWidget, QHBoxLayout, QPushButton, QS
 
 # ── Title bar ─────────────────────────────────────────────────────────────────
 class TitleBar(QWidget):
-    HEIGHT = 42
+    HEIGHT = 30
 
     def __init__(self, window: QMainWindow):
         super().__init__()
@@ -16,19 +16,25 @@ class TitleBar(QWidget):
         self._drag_pos = QPoint()
 
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(0, 0, 8, 0)
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
         spacer = QWidget()
         spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
 
         self._btn_close = QPushButton("✕")
-        self._btn_close.setFixedSize(36, 28)
+        self._btn_close.setFixedSize(40, 30)
         # self._btn_close.setFlat(True)
         self._btn_close.setCursor(Qt.CursorShape.PointingHandCursor)
         self._btn_close.clicked.connect(self._window.close)
 
+        self._btn_minimize = QPushButton("—")
+        self._btn_minimize.setFixedSize(40, 30)
+        self._btn_minimize.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._btn_minimize.clicked.connect(self._window.showMinimized)
+
         layout.addWidget(spacer)
+        layout.addWidget(self._btn_minimize)
         layout.addWidget(self._btn_close)
 
 
@@ -74,6 +80,19 @@ class TitleBar(QWidget):
             QPushButton:hover {{
                 background: {t['close_hover']};
                 color: {t['close_hover_text']};
-                border-radius: 4px;
+                border-radius: 0px;
+            }}
+        """)
+        self._btn_minimize.setStyleSheet(f"""
+            QPushButton {{
+                color: {t['text']};
+                background: transparent;
+                border: none;
+                font-size: 14px;
+            }}
+            QPushButton:hover {{
+                background: {t['placeholder']};
+                color: {t['text_secondary']};
+                border-radius: 0px;
             }}
         """)
