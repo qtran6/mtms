@@ -11,16 +11,13 @@ block_cipher = None
 ROOT = Path(SPECPATH)
 
 # Data files to bundle alongside the .exe
-data_files = []
-for f in (ROOT / "data").iterdir():
-    if f.is_file() and f.name != "draft.json":
-        data_files.append((str(f), "data"))
-        
-# Format: (source_path_on_disk, destination_folder_in_bundle)
 datas = [
-    (str(ROOT / "data"),                       "data"),
-    (str(ROOT / "client" / "assets"),          "client/assets"),
+    (str(ROOT / "client" / "assets"), "client/assets"),
 ]
+
+for f in (ROOT / "data").iterdir():
+    if f.is_file() and f.name not in ("BangGia.xlsx", "draft.json"):
+        datas.append((str(f), "data"))
 
 a = Analysis(
     ["main.py"],

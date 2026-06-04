@@ -9,11 +9,22 @@ Usage:
     # Each product: {"brand": str, "name": str, "price": float}
 """
 
+import sys
+
 import pandas as pd
 from pathlib import Path
 
-_FILE = Path(__file__).parent.parent.parent / "data" / "BangGia.xlsx"
+def _xlsx_path() -> Path:
+    """Find BangGia.xlsx — checks dev location and bundled location."""
+    # When bundled with PyInstaller, sys.frozen is True
+    if getattr(sys, "frozen", False):
+        # Executable directory
+        return Path(sys.executable).parent / "BangGia.xlsx"
+    else:
+        # Dev — file is at app/data/BangGia.xlsx
+        return Path(__file__).parent.parent.parent / "data" / "BangGia.xlsx"
 
+_FILE = _xlsx_path()
 
 def load_products(file_path: Path = _FILE) -> list[dict]:
     """
