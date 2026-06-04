@@ -327,11 +327,9 @@ class OrderController:
         self._refresh_tab_bar()
 
     def _refresh_tab_bar(self):
-        """Rebuild the tab bar from scratch."""
         page = self.page
         layout = page._tab_layout
 
-        # Clear existing widgets (keep the stretch at the end)
         while layout.count() > 0:
             item = layout.takeAt(0)
             w = item.widget()
@@ -341,17 +339,18 @@ class OrderController:
 
         self._tab_buttons = []
 
-        # Create one TabButton per tab
         from client.ui.pages.order import TabButton
         for i in range(len(self._tabs)):
-            btn = TabButton(i + 1)
+            custom_name = self._tabs[i].get("name", "")
+            label = custom_name if custom_name else str(i + 1)
+            btn = TabButton(label)
             btn.set_active(i == self._active_tab)
             btn.clicked.connect(lambda idx=i: self._switch_to_tab(idx))
             btn.closed.connect(lambda idx=i: self._close_tab(idx))
+            btn.renamed.connect(lambda name, idx=i: self._on_tab_renamed(idx, name))
             layout.addWidget(btn)
             self._tab_buttons.append(btn)
 
-        # The "+" button
         plus = QPushButton("+")
         plus.setObjectName("tab_plus_btn")
         plus.setFixedSize(28, 28)
@@ -363,6 +362,10 @@ class OrderController:
         layout.addStretch(1)
         page._tab_bar.update()
         page._left_column.update()
+
+    def _on_tab_renamed(self, index: int, new_name: str):
+        if 0 <= index < len(self._tabs):
+            self._tabs[index]["name"] = new_name
 
     def _duplicate_current_tab(self):
         """Copy the current tab into a new tab (always uses default numbering)."""

@@ -7,7 +7,7 @@
 #define MyAppExeName    "Toa Hang.exe"
 
 [Setup]
-AppId={D5C9B7E4-1234-5678-9ABC-DEF012345678}
+AppId={{D5C9B7E4-1234-5678-9ABC-DEF012345678}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
