@@ -141,9 +141,8 @@ class OrderPage(QWidget):
         scroll_area = HorizontalScrollArea()
         scroll_area.setWidget(bar)
         scroll_area.setWidgetResizable(True)
-        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        scroll_area.setFixedHeight(48)
         scroll_area.setFrameShape(QFrame.Shape.NoFrame)
 
         return scroll_area

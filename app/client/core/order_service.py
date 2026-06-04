@@ -125,9 +125,6 @@ class OrderController:
         # Scroll the table to show the new row
         table.setCurrentCell(target_row, 0)
 
-        # Highlight the new row with a fading animation
-        flash_row(table, target_row)
-
         self._update_grand_total()
         QTimer.singleShot(100, self._reset_model_input)
 
