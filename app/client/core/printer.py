@@ -142,7 +142,7 @@ def _draw_later_page_header(canvas, doc):
 
 
 # ── Table ────────────────────────────────────────────────────────────────────────
-def _build_table(rows: list[dict], grand_total: int) -> Table:
+def _build_table(rows: list[dict], grand_total: int, border_thickness: int = 1) -> Table:
     header = ["TT", "Tên HH", "SL", "Đơn Giá", "Thành Tiền"]
     data = [header]
     for i, r in enumerate(rows, start=1):
@@ -161,7 +161,7 @@ def _build_table(rows: list[dict], grand_total: int) -> Table:
         ("ALIGN",     (2, 0), (2, -1),  "CENTER"),
         ("ALIGN",     (3, 0), (-1, -1), "RIGHT"),
         ("VALIGN",    (0, 0), (-1, -1), "MIDDLE"),
-        ("GRID",      (0, 0), (-1, -2), 1, colors.darkgray),
+        ("GRID",      (0, 0), (-1, -2), border_thickness, colors.darkgray),
         ("TOPPADDING",    (0, 0), (-1, -1), 6),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
         ("RIGHTPADDING",  (0, 0), (-1, -1), 2),
@@ -224,8 +224,7 @@ def _open_with_print_dialog(pdf_path: str):
         print(f"[printer] Could not open print dialog: {e}")
 
 
-def print_order(parent, customer, table, products):
-    """Generate the PDF and open it in the default PDF viewer."""
+def print_order(parent, customer, table, products, border_thickness: int = 1):
     if not _register_fonts():
         return
 
@@ -279,7 +278,7 @@ def print_order(parent, customer, table, products):
         from reportlab.platypus import Spacer
         story.append(Spacer(1, 8 * mm))
 
-    story.append(_build_table(rows, grand_total))
+    story.append(_build_table(rows, grand_total, border_thickness))
 
     doc.build(story)
     return pdf_path

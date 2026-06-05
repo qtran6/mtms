@@ -19,6 +19,7 @@ from PySide6.QtPdf import QPdfDocument
 from PySide6.QtPrintSupport import QPrinterInfo
 
 from client.ui.custom_widgets import *
+from client.core.config_service import load_config, save_config
 
 
 class PrintPreviewPage(QWidget):
@@ -94,12 +95,25 @@ class PrintPreviewPage(QWidget):
         self._printer_combo = QComboBox()
         self._populate_printers()
 
+        # Thickness of table cell border
+        thickness_label = QLabel("Độ đậm:")
+        thickness_label.setObjectName("preview_label")
+        self._thickness_spin = QSpinBox()
+        self._thickness_spin.setMinimum(1)
+        self._thickness_spin.setMaximum(10)
+        self._thickness_spin.setValue(load_config().get("border_thickness", 1))
+        self._thickness_spin.valueChanged.connect(
+            lambda val: save_config({**load_config(), "border_thickness": val})
+        )
+
         v.addWidget(self._print_btn)
         v.addSpacing(8)
         v.addWidget(copies_label)
         v.addWidget(self._copies_spin)
         v.addWidget(printer_label)
         v.addWidget(self._printer_combo)
+        v.addWidget(thickness_label)
+        v.addWidget(self._thickness_spin)
         v.addStretch(1)
         v.addWidget(self._cancel_btn)
 
@@ -156,6 +170,10 @@ class PrintPreviewPage(QWidget):
         self._render_pages()
         # Move focus to the Print button so Enter works
         self._print_btn.setFocus()
+
+    @property
+    def border_thickness(self) -> int:
+        return self._thickness_spin.value()
 
     def _clear_pages(self):
         while self._pages_layout.count():

@@ -11,6 +11,8 @@ from PySide6.QtWidgets import QTableWidgetItem, QPushButton
 from client.core.completer import combo_completer
 from client.core.draft_service import save_draft, load_draft
 from client.ui.custom_widgets import *
+from client.core.printer import print_order
+from client.core.config_service import load_config
 
 
 # ── Alignment constants ───────────────────────────────────────────────────────
@@ -181,24 +183,14 @@ class OrderController:
         self._update_grand_total()
 
     # ── Print ─────────────────────────────────────────────────────────────────
-    # def on_print(self):
-    #     from client.core.printer import print_order
-    #     page = self.page
-    #     print_order(
-    #         parent=page,
-    #         customer=page._customer_text_box.text(),
-    #         table=page._table_view,
-    #         products=page._products,
-    #     )
-
     def on_print(self):
-        from client.core.printer import print_order
         page = self.page
         pdf_path = print_order(
             parent=page,
             customer=page._customer_text_box.text(),
             table=page._table_view,
             products=page._products,
+            border_thickness=load_config().get("border_thickness", 1),
         )
         if pdf_path:
             # Walk up to main window to show preview
