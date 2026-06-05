@@ -2,7 +2,7 @@
 ; Open in Inno Setup Compiler and click Build
 
 #define MyAppName       "Toa Hang"
-#define MyAppVersion    "1.0.0"
+#define MyAppVersion    "1.0.1"
 #define MyAppPublisher  "Quan Tran"
 #define MyAppExeName    "Toa Hang.exe"
 
@@ -11,7 +11,7 @@ AppId={{D5C9B7E4-1234-5678-9ABC-DEF012345678}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
-DefaultDirName={autopf}\{#MyAppName}
+DefaultDirName={userdesktop}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 OutputBaseFilename=MTMS-Setup-{#MyAppVersion}

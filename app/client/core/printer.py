@@ -161,7 +161,7 @@ def _build_table(rows: list[dict], grand_total: int) -> Table:
         ("ALIGN",     (2, 0), (2, -1),  "CENTER"),
         ("ALIGN",     (3, 0), (-1, -1), "RIGHT"),
         ("VALIGN",    (0, 0), (-1, -1), "MIDDLE"),
-        ("GRID",      (0, 0), (-1, -2), 0.5, colors.darkgray),
+        ("GRID",      (0, 0), (-1, -2), 1, colors.darkgray),
         ("TOPPADDING",    (0, 0), (-1, -1), 6),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
         ("RIGHTPADDING",  (0, 0), (-1, -1), 2),

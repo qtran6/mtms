@@ -6,9 +6,20 @@ Used to restore the in-progress order when the app restarts.
 
 import json
 from pathlib import Path
+import os
 
-_DRAFT_FILE = Path(__file__).parent.parent.parent / "data" / "draft.json"
+def _draft_file() -> Path:
+    """Return the draft file path. Uses %APPDATA%\\MTMS\\draft.json."""
+    appdata = os.environ.get("APPDATA")
+    if appdata:
+        folder = Path(appdata) / "MTMS"
+    else:
+        # Fallback to user home
+        folder = Path.home() / ".mtms"
+    folder.mkdir(parents=True, exist_ok=True)
+    return folder / "draft.json"
 
+_DRAFT_FILE = _draft_file()
 
 def save_draft(data: dict):
     """Write the current order draft to disk."""
