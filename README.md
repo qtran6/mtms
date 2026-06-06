@@ -5,7 +5,7 @@ A desktop app for creating and printing order forms — built with Python and Py
 ![Python](https://img.shields.io/badge/Python-3.11+-blue)
 ![PySide6](https://img.shields.io/badge/PySide6-6.11.1-green)
 ![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey)
-![License](https://img.shields.io/badge/License-MT-yellow)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ---
 
