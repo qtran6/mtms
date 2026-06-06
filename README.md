@@ -3,9 +3,9 @@
 A desktop app for creating and printing order forms — built with Python and PySide6.
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue)
-![PySide6](https://img.shields.io/badge/PySide6-6.x-green)
+![PySide6](https://img.shields.io/badge/PySide6-6.11.1-green)
 ![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey)
-![License](https://img.shields.io/badge/License-MIT-yellow)
+![License](https://img.shields.io/badge/License-MT-yellow)
 
 ---
 
@@ -132,4 +132,4 @@ Company info (name, address, phone, bank) is configured in `data/company.json`.
 
 ## License
 
-Ắc Quy Minh Tân - Bình Dương
+MIT
