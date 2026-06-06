@@ -2,7 +2,7 @@
 ; Open in Inno Setup Compiler and click Build
 
 #define MyAppName       "Toa Hang"
-#define MyAppVersion    "1.0.1"
+#define MyAppVersion    "1.2.0"
 #define MyAppPublisher  "Quan Tran"
 #define MyAppExeName    "Toa Hang.exe"
 
@@ -14,7 +14,7 @@ AppPublisher={#MyAppPublisher}
 DefaultDirName={userdesktop}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
-OutputBaseFilename=MTMS-Setup-{#MyAppVersion}
+OutputBaseFilename=MTMS_Setup
 SetupIconFile=client\assets\MT.ico
 Compression=lzma
 SolidCompression=yes
