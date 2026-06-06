@@ -26,6 +26,8 @@ a = Analysis(
     datas=datas,
     hiddenimports=[
         "reportlab.rl_settings",
+        "packaging",
+        "packaging.version",
     ],
     hookspath=[],
     runtime_hooks=[],

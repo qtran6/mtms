@@ -2,7 +2,7 @@
 ; Open in Inno Setup Compiler and click Build
 
 #define MyAppName       "Toa Hang"
-#define MyAppVersion    "1.2.0"
+#define MyAppVersion    "v1.1.0-beta"
 #define MyAppPublisher  "Quan Tran"
 #define MyAppExeName    "Toa Hang.exe"
 
