@@ -7,10 +7,9 @@ import os
 import tempfile
 import subprocess
 import urllib.request
-import urllib.error
 from packaging.version import Version
 
-GITHUB_REPO = "q_tran6/mtms"
+GITHUB_REPO = "qtran6/mtms"
 CURRENT_VERSION = "1.1.0"
 INSTALLER_FILENAME = "MTMS_Setup.exe"
 

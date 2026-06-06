@@ -5,9 +5,7 @@ Holds the controller pattern just like OrderController. The MainWindow widget
 constructs the UI and delegates behavior to MainWindowController.
 """
 
-import sys
 import subprocess
-from pathlib import Path
 
 from PySide6.QtCore import Qt, QTimer, QEvent, QRect
 from PySide6.QtGui import QColor, QPainter, QBrush, QPainterPath, QPen
@@ -105,30 +103,38 @@ class MainWindowController:
         self.window._content.setCurrentWidget(self.window._print_preview_page)
 
     def handle_print_requested(self, pdf_path: str, printer_name: str, copies: int):
-        """Called when the preview page emits print_requested."""
-        sumatra = Path(__file__).parent.parent.parent / "data" / "SumatraPDF.exe"
-
-        if not sumatra.exists():
-            print(f"[print] SumatraPDF not found at: {sumatra}")
-            self.window._content.setCurrentWidget(self.window._order_page)
-            return
-
         print(f"[print] Printing to '{printer_name}' x{copies}")
-        result = subprocess.run([
-            str(sumatra),
-            "-print-to", printer_name,
-            "-silent",
-            "-print-settings", f"{copies}x",
-            pdf_path,
-        ], capture_output=True, text=True)
-
-        if result.returncode != 0:
-            print(f"[print] SumatraPDF failed: {result.stderr}")
-
-        self.window._content.setCurrentWidget(self.window._order_page)
+        try:
+            subprocess.run([
+                "powershell", "-Command",
+                f'Start-Process -FilePath "{pdf_path}" -Verb PrintTo -ArgumentList "{printer_name}"'
+            ], capture_output=True, text=True)
+        except Exception as e:
+            print(f"[print] Failed: {e}")
+        finally:
+            self.window._content.setCurrentWidget(self.window._order_page)
 
     def handle_preview_cancelled(self):
         self.window._content.setCurrentWidget(self.window._order_page)
+
+    # ── Update button ───────────────────────────────────────────────────────
+    def reposition_update_btn(self):
+        btn = self.window._update_btn
+        margin = 20
+        btn.move(
+            self.window.width()  - btn.width()  - margin,
+            self.window.height() - btn.height() - margin,
+        )
+
+    def handle_resize(self, event):
+        if hasattr(self.window, "_update_btn"):
+            self.reposition_update_btn()
+
+    def check_for_update(self):
+        from client.core.updater import check_for_update
+        result = check_for_update()
+        if result:
+            self.window._update_btn.notify(result["version"], result["download_url"])
 
     # ── Lifecycle ─────────────────────────────────────────────────────────────
     def handle_close(self):

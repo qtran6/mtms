@@ -11,9 +11,10 @@ from PySide6.QtGui import (
 )
 
 from client.core.theme import load_theme
-from client.core.main_window_service import MainWindowController
-from client.ui.pages import *
 from client.ui.custom_widgets.title_bar import TitleBar
+from client.ui.pages import *
+from client.core.main_window_service import MainWindowController
+from client.ui.custom_widgets.update_button import UpdateButton
 
 
 RADIUS = 12
@@ -76,6 +77,14 @@ class MainWindow(QMainWindow):
             restore_size=RESTORE_SIZE,
         )
 
+        # Floating update button — positioned over bottom-right of content
+        self._update_btn = UpdateButton(self)
+        self._update_btn.raise_()
+        self._reposition_update_btn()
+
+        # Check for updates after startup
+        QTimer.singleShot(2000, self._check_for_update)
+
         # Wire signals
         self._print_preview_page.print_requested.connect(self._controller.handle_print_requested)
         self._print_preview_page.cancelled.connect(self._controller.handle_preview_cancelled)
@@ -115,6 +124,17 @@ class MainWindow(QMainWindow):
     def _is_dark(self) -> bool:
         c = QApplication.palette().color(QPalette.ColorRole.Window)
         return (0.2126 * c.red() + 0.7152 * c.green() + 0.0722 * c.blue()) < 128
+    
+    # Update button
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self._controller.handle_resize(event)
+
+    def _check_for_update(self):
+        self._controller.check_for_update()
+
+    def _reposition_update_btn(self):
+        self._controller.reposition_update_btn()
 
     def _apply_theme(self, force: bool = False):
         dark = self._is_dark()
@@ -177,6 +197,8 @@ class MainWindow(QMainWindow):
         self._title_bar.apply_theme(t)
         self._order_page.apply_theme(t)
         self._print_preview_page.apply_theme(t)
+        if hasattr(self, "_update_btn"):
+            self._update_btn.apply_theme(t)
         self._content.setStyleSheet("background: transparent;")
         self.centralWidget().setStyleSheet("#root { background: transparent; }")
 
