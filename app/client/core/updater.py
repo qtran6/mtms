@@ -10,7 +10,7 @@ import urllib.request
 from packaging.version import Version
 
 GITHUB_REPO = "qtran6/mtms"
-CURRENT_VERSION = "1.1.1-beta"
+CURRENT_VERSION = "1.1.0-beta.1"
 INSTALLER_FILENAME = "MTMS_Setup.exe"
 
 _API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
