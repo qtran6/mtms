@@ -103,14 +103,20 @@ class MainWindowController:
         self.window._content.setCurrentWidget(self.window._print_preview_page)
 
     def handle_print_requested(self, pdf_path: str, printer_name: str, copies: int):
-        print(f"[print] Printing to '{printer_name}' x{copies}")
+        from pathlib import Path
         try:
+            sumatra = Path(__file__).parent.parent.parent / "data" / "SumatraPDF.exe"
+            if not sumatra.exists():
+                return
             subprocess.run([
-                "powershell", "-Command",
-                f'Start-Process -FilePath "{pdf_path}" -Verb PrintTo -ArgumentList "{printer_name}"'
+                str(sumatra),
+                "-print-to", printer_name,
+                "-silent",
+                "-print-settings", f"{copies}x",
+                pdf_path,
             ], capture_output=True, text=True)
         except Exception as e:
-            print(f"[print] Failed: {e}")
+            pass
         finally:
             self.window._content.setCurrentWidget(self.window._order_page)
 

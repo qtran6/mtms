@@ -10,7 +10,7 @@ import urllib.request
 from packaging.version import Version
 
 GITHUB_REPO = "qtran6/mtms"
-CURRENT_VERSION = "1.1.0"
+CURRENT_VERSION = "1.1.1-beta"
 INSTALLER_FILENAME = "MTMS_Setup.exe"
 
 _API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
@@ -34,6 +34,8 @@ def check_for_update() -> dict | None:
 
         if latest and download_url and Version(latest) > Version(CURRENT_VERSION):
             return {"version": latest, "download_url": download_url}
+        
+        print(f"[updater] No update available (latest: {latest}, current: {CURRENT_VERSION})")
 
     except Exception as e:
         print(f"[updater] Check failed: {e}")

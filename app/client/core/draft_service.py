@@ -16,6 +16,7 @@ def _draft_file() -> Path:
     else:
         # Fallback to user home
         folder = Path.home() / ".mtms"
+        print(folder)
     folder.mkdir(parents=True, exist_ok=True)
     return folder / "draft.json"
 
