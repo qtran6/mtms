@@ -143,6 +143,10 @@ class UpdateButton(QWidget):
     def _on_finished(self):
         self._progress = 100
         self.update()
+        # Quit from main thread after a short delay so the arc renders at 100%
+        from PySide6.QtCore import QTimer
+        from PySide6.QtWidgets import QApplication
+        QTimer.singleShot(500, QApplication.quit)
 
     def _on_failed(self, msg: str):
         self._failed = True
