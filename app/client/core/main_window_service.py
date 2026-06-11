@@ -7,8 +7,10 @@ constructs the UI and delegates behavior to MainWindowController.
 
 import subprocess
 
-from PySide6.QtCore import Qt, QTimer, QEvent, QRect
+from PySide6.QtCore import QThread, Qt, QTimer, QEvent, QRect, Signal
 from PySide6.QtGui import QColor, QPainter, QBrush, QPainterPath, QPen
+from pathlib import Path
+from PySide6.QtWidgets import QMessageBox
 
 
 class MainWindowController:
@@ -26,6 +28,11 @@ class MainWindowController:
 
         # State
         self._was_maximized_before_minimize = False
+        
+        self._autosave_timer = QTimer(window)
+        self._autosave_timer.setInterval(30_000)   # 30s
+        self._autosave_timer.timeout.connect(self.save_draft)
+        self._autosave_timer.start()
 
     # ── Window state ──────────────────────────────────────────────────────────
     def set_margins(self, maximized: bool):
@@ -103,20 +110,24 @@ class MainWindowController:
         self.window._content.setCurrentWidget(self.window._print_preview_page)
 
     def handle_print_requested(self, pdf_path: str, printer_name: str, copies: int):
-        from pathlib import Path
         try:
             sumatra = Path(__file__).parent.parent.parent / "data" / "SumatraPDF.exe"
             if not sumatra.exists():
+                QMessageBox.warning(self.window, "Lỗi in",
+                                    "Không tìm thấy SumatraPDF.exe — không thể in.")
                 return
-            subprocess.run([
+            result = subprocess.run([
                 str(sumatra),
                 "-print-to", printer_name,
                 "-silent",
                 "-print-settings", f"{copies}x",
                 pdf_path,
             ], capture_output=True, text=True)
+            if result.returncode != 0:
+                QMessageBox.warning(self.window, "Lỗi in",
+                                    f"In thất bại (máy in: {printer_name}).\n{result.stderr.strip()}")
         except Exception as e:
-            pass
+            QMessageBox.warning(self.window, "Lỗi in", f"In thất bại:\n{e}")
         finally:
             self.window._content.setCurrentWidget(self.window._order_page)
 
@@ -137,14 +148,28 @@ class MainWindowController:
             self.reposition_update_btn()
 
     def check_for_update(self):
+        self._check_worker = _UpdateCheckWorker()
+        self._check_worker.found.connect(
+            lambda r: self.window._update_btn.notify(r["version"], r["download_url"])
+        )
+        self._check_worker.start()
+
+    # ── Lifecycle ─────────────────────────────────────────────────────────────
+    def save_draft(self):
+        page = self.window._order_page
+        if hasattr(page, "_controller") and hasattr(page._controller, "save_state"):
+            page._controller.save_state()
+            
+    def handle_close(self):
+        """Called from MainWindow.closeEvent — save draft."""
+        self.save_draft()
+
+class _UpdateCheckWorker(QThread):
+    """Runs the GitHub release check off the GUI thread."""
+    found = Signal(dict)
+
+    def run(self):
         from client.core.updater import check_for_update
         result = check_for_update()
         if result:
-            self.window._update_btn.notify(result["version"], result["download_url"])
-
-    # ── Lifecycle ─────────────────────────────────────────────────────────────
-    def handle_close(self):
-        """Called from MainWindow.closeEvent — save draft."""
-        current = self.window._content.currentWidget()
-        if hasattr(current, "_controller") and hasattr(current._controller, "save_state"):
-            current._controller.save_state()
+            self.found.emit(result)

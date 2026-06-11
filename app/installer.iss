@@ -2,7 +2,10 @@
 ; Open in Inno Setup Compiler and click Build
 
 #define MyAppName       "Toa Hang"
-#define MyAppVersion    "v1.1.0"
+#define VerFile FileOpen("client\version.py")
+#define VerLine FileRead(VerFile)
+#expr FileClose(VerFile)
+#define MyAppVersion Copy(VerLine, Pos('"', VerLine) + 1, RPos('"', VerLine) - Pos('"', VerLine) - 1)
 #define MyAppPublisher  "Quan Tran"
 #define MyAppExeName    "Toa Hang.exe"
 

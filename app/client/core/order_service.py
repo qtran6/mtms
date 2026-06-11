@@ -185,19 +185,23 @@ class OrderController:
     # ── Print ─────────────────────────────────────────────────────────────────
     def on_print(self):
         page = self.page
-        pdf_path = print_order(
-            parent=page,
-            customer=page._customer_text_box.text(),
-            table=page._table_view,
-            products=page._products,
-            border_thickness=load_config().get("border_thickness", 1),
-        )
+        try:
+            pdf_path = print_order(
+                parent=page,
+                customer=page._customer_text_box.text(),
+                table=page._table_view,
+                products=page._products,
+                border_thickness=load_config().get("border_thickness", 1),
+            )
+        except Exception as e:
+            from PySide6.QtWidgets import QMessageBox
+            QMessageBox.warning(page, "Lỗi in", f"Không tạo được phiếu in:\n{e}")
+            return
         if pdf_path:
-            # Walk up to main window to show preview
             window = page.window()
             if hasattr(window, "show_print_preview"):
                 window.show_print_preview(pdf_path)
-
+                
     # ── Grand total ───────────────────────────────────────────────────────────
     def _update_grand_total(self):
         table = self.page._table_view
@@ -331,7 +335,6 @@ class OrderController:
 
         self._tab_buttons = []
 
-        from client.ui.pages.order import TabButton
         for i in range(len(self._tabs)):
             custom_name = self._tabs[i].get("name", "")
             label = custom_name if custom_name else str(i + 1)

@@ -11,9 +11,9 @@ from PySide6.QtGui import (
 )
 
 from client.core.theme import load_theme
-from client.ui.custom_widgets.title_bar import TitleBar
 from client.ui.pages import *
 from client.core.main_window_service import MainWindowController
+from client.ui.custom_widgets.title_bar import TitleBar
 from client.ui.custom_widgets.update_button import UpdateButton
 
 
