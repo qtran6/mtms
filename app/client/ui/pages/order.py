@@ -134,14 +134,15 @@ class OrderPage(QWidget):
         bar = QWidget()
         bar.setObjectName("tab_bar")
         self._tab_layout = QHBoxLayout(bar)
-        self._tab_layout.setContentsMargins(0, 4, 0, 0)
+        self._tab_layout.setContentsMargins(0, 4, 0, 6)
         self._tab_layout.setSpacing(4)
         self._tab_layout.addStretch(1)
 
         scroll_area = HorizontalScrollArea()
         scroll_area.setWidget(bar)
         scroll_area.setWidgetResizable(True)
-        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll_area.setFixedHeight(70)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll_area.setFrameShape(QFrame.Shape.NoFrame)
 
