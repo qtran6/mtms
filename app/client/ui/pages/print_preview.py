@@ -75,11 +75,11 @@ class PrintPreviewPage(QWidget):
         self._print_btn.setDefault(True)
         self._print_btn.setAutoDefault(True)
 
-        # Cancel button
-        self._cancel_btn = QPushButton("Hủy")
-        self._cancel_btn.setObjectName("preview_cancel_btn")
-        self._cancel_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self._cancel_btn.clicked.connect(self.cancelled.emit)
+        # Send PDF button
+        self._send_btn = QPushButton("Gửi PDF")
+        self._send_btn.setObjectName("preview_print_btn")
+        self._send_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._send_btn.clicked.connect(self._on_send)
 
         # Copies
         copies_label = QLabel("Số bản:")
@@ -106,8 +106,15 @@ class PrintPreviewPage(QWidget):
             lambda val: save_config({**load_config(), "border_thickness": val})
         )
 
-        v.addWidget(self._print_btn)
+        # Cancel button
+        self._cancel_btn = QPushButton("Hủy")
+        self._cancel_btn.setObjectName("preview_cancel_btn")
+        self._cancel_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._cancel_btn.clicked.connect(self.cancelled.emit)
+
         v.addSpacing(8)
+        v.addWidget(self._print_btn)
+        v.addWidget(self._send_btn)
         v.addWidget(copies_label)
         v.addWidget(self._copies_spin)
         v.addWidget(printer_label)
@@ -218,6 +225,18 @@ class PrintPreviewPage(QWidget):
         printer = self._printer_combo.currentText()
         copies = self._copies_spin.value()
         self.print_requested.emit(self._pdf_path, printer, copies)
+
+    def _on_send(self):
+        if not self._pdf_path:
+            return
+        from PySide6.QtCore import QUrl, QMimeData
+        from PySide6.QtWidgets import QApplication
+        mime = QMimeData()
+        mime.setUrls([QUrl.fromLocalFile(self._pdf_path)])
+        QApplication.clipboard().setMimeData(mime)
+        self._send_btn.setText("Đã copy")
+        from PySide6.QtCore import QTimer
+        QTimer.singleShot(2500, lambda: self._send_btn.setText("Gửi PDF"))
 
     # ── Theme ─────────────────────────────────────────────────────────────────
     def apply_theme(self, t: dict):

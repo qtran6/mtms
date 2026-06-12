@@ -424,7 +424,7 @@ class OrderPage(QWidget):
             }}
             QLabel#grand_total_label {{
                 color: {t['text']};
-                font-size: 16pt;
+                font-size: 24pt;
                 font-weight: bold;
                 background: transparent;
                 border: none;

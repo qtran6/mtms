@@ -12,6 +12,7 @@ Layout:
 
 import json
 import os
+import re
 import tempfile
 import platform
 import subprocess
@@ -212,8 +213,9 @@ def print_order(parent, customer, table, products, border_thickness: int = 1):
 
     grand_total = sum(_parse_total(r["total"]) for r in rows)
 
-    fd, pdf_path = tempfile.mkstemp(suffix=".pdf", prefix="order_")
-    os.close(fd)
+    safe = re.sub(r'[\\/:*?"<>|]', "", customer.strip()) or "khach"
+    stamp = datetime.now().strftime("%d-%m-%Y_%H%M%S")
+    pdf_path = os.path.join(tempfile.gettempdir(), f"Don hang {safe} {stamp}.pdf")
 
     doc = BaseDocTemplate(
         pdf_path,
