@@ -19,10 +19,10 @@ def _xlsx_path() -> Path:
     # When bundled with PyInstaller, sys.frozen is True
     if getattr(sys, "frozen", False):
         # Executable directory
-        return Path(sys.executable).parent / "BangGia.xlsx"
+        return Path(sys.executable).parent.parent / "BangGia.xlsx"
     else:
         # Dev — file is at app/data/BangGia.xlsx
-        return Path(__file__).parent.parent / "data" / "BangGia.xlsx"
+        return Path(__file__).parent.parent.parent / "data" / "BangGia.xlsx"
 
 _FILE = _xlsx_path()
 
