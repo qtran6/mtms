@@ -22,7 +22,7 @@ def _xlsx_path() -> Path:
         return Path(sys.executable).parent / "BangGia.xlsx"
     else:
         # Dev — file is at app/data/BangGia.xlsx
-        return Path(__file__).parent.parent.parent / "data" / "BangGia.xlsx"
+        return Path(__file__).parent.parent / "data" / "BangGia.xlsx"
 
 _FILE = _xlsx_path()
 
