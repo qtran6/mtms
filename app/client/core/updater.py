@@ -65,9 +65,10 @@ def download_and_install(download_url: str, progress_callback=None):
         with open(bat_path, "w") as f:
             f.write(
                 f'@echo off\n'
-                f'taskkill /F /IM "Toa Hang.exe" /T >nul 2>&1\n'
+                f'taskkill /F /IM "Toa Hang.exe" >nul 2>&1\n'
                 f'ping 127.0.0.1 -n 3 >nul\n'
                 f'start "" "{path}" /SILENT\n'
+                f'del "%~f0"\n'
             )
 
         subprocess.Popen(
