@@ -116,6 +116,12 @@ def load_price_groups() -> list[dict]:
         if text == 0 and num == 0:
             return "empty"
         return "name" if text > num else "price"
+    
+    # Format header labels
+    def _fmt_label(v) -> str:
+        if isinstance(v, float) and v.is_integer():
+            return str(int(v))
+        return str(v).strip()
 
     kinds = [classify(c) for c in range(df.shape[1])]
 
@@ -132,7 +138,7 @@ def load_price_groups() -> list[dict]:
                 "tiers": [],
             }
         elif kind == "price" and current is not None:
-            label = None if pd.isna(header) else str(header).strip()
+            label = None if pd.isna(header) else _fmt_label(header)
             prices = {}
             for r in range(1, df.shape[0]):
                 name = df.iloc[r, current["_name_col"]]
