@@ -70,6 +70,87 @@ def load_products(file_path: Path = _FILE) -> list[dict]:
 
     return products
 
+def _gia_dac_biet_path() -> Path:
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).parent.parent / "GiaDacBiet.xlsx"
+    else:
+        return Path(__file__).parent.parent.parent / "data" / "GiaDacBiet.xlsx"
+
+
+def load_price_groups() -> list[dict]:
+    """
+    Parse GiaDacBiet.xlsx into brand blocks:
+        [
+            {"brand": "Chengshin", "tiers": [{"label": None, "prices": {name: price, ...}}]},
+            {"brand": "OTO GS",    "tiers": [{"label": "9", "prices": {...}}, ...]},
+            ...
+        ]
+    Column type is inferred from data rows: text→name, numeric→price.
+    Returns [] if the file is missing or has no data rows yet.
+    """
+    path = _gia_dac_biet_path()
+    if not path.exists():
+        return []
+
+    try:
+        df = pd.read_excel(path, sheet_name="Tổng Quát", header=None)
+    except Exception as e:
+        print(f"[price_groups] load failed: {e}")
+        return []
+
+    if df.shape[0] < 2:
+        return []  # header only, no products
+
+    # Classify each column from data rows
+    def classify(col: int) -> str:
+        text, num = 0, 0
+        for r in range(1, df.shape[0]):
+            v = df.iloc[r, col]
+            if pd.isna(v):
+                continue
+            try:
+                float(v)
+                num += 1
+            except (ValueError, TypeError):
+                text += 1
+        if text == 0 and num == 0:
+            return "empty"
+        return "name" if text > num else "price"
+
+    kinds = [classify(c) for c in range(df.shape[1])]
+
+    blocks = []
+    current = None
+    for c, kind in enumerate(kinds):
+        header = df.iloc[0, c]
+        if kind == "name":
+            if current:
+                blocks.append(current)
+            current = {
+                "brand": str(header).strip() if not pd.isna(header) else "",
+                "_name_col": c,
+                "tiers": [],
+            }
+        elif kind == "price" and current is not None:
+            label = None if pd.isna(header) else str(header).strip()
+            prices = {}
+            for r in range(1, df.shape[0]):
+                name = df.iloc[r, current["_name_col"]]
+                price = df.iloc[r, c]
+                if pd.isna(name) or str(name).strip() in ("", "."):
+                    continue
+                try:
+                    prices[str(name).strip()] = float(price)
+                except (ValueError, TypeError):
+                    continue
+            current["tiers"].append({"label": label, "prices": prices})
+    if current:
+        blocks.append(current)
+
+    for b in blocks:
+        b.pop("_name_col", None)
+    return blocks
+
 if __name__ == "__main__":
     products = load_products()
     print(f"Loaded {len(products)} products")

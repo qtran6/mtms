@@ -18,7 +18,7 @@ from PySide6.QtGui import QColor
 from PySide6.QtCore import Qt, Signal
 
 from client.core.completer import combo_completer
-from client.core.data_loader import load_products
+from client.core.data_loader import load_price_groups, load_products
 from client.core.order_service import OrderController
 from client.ui.custom_widgets import *
 
@@ -29,6 +29,20 @@ class OrderPage(QWidget):
 
         # Load data 
         self._products = load_products()
+        self._price_groups = load_price_groups()
+        # Chengshin and IRC are always applied together — merge into one block
+        targets = ("CHENGSHIN", "IRC")
+        if all(t in {b["brand"] for b in self._price_groups} for t in targets):
+            combined = {}
+            for block in self._price_groups:
+                if block["brand"] in targets:
+                    for tier in block["tiers"]:
+                        combined.update(tier["prices"])
+            self._price_groups = [b for b in self._price_groups if b["brand"] not in targets]
+            self._price_groups.insert(0, {
+                "brand": "CHENGSHIN + IRC",
+                "tiers": [{"label": None, "prices": combined}],
+            })
         self._brands = list(dict.fromkeys(p["brand"] for p in self._products))
 
         self._build_ui()
@@ -147,6 +161,55 @@ class OrderPage(QWidget):
         scroll_area.setFrameShape(QFrame.Shape.NoFrame)
 
         return scroll_area
+    
+    def _create_price_group_buttons(self) -> QWidget:
+        container = QWidget()
+        container.setObjectName("price_groups_box")
+        v = QVBoxLayout(container)
+        v.setContentsMargins(0, 8, 0, 0)
+        v.setSpacing(8)
+
+        self._price_group_buttons: list[QPushButton] = []
+
+        def make_btn(text: str, key: str, brand: str = "") -> QPushButton:
+            btn = QPushButton(text)
+            btn.setObjectName("price_group_btn")
+            btn.setProperty("active", "false")
+            btn.setProperty("group_key", key)
+            btn.setProperty("brand", brand)
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            self._price_group_buttons.append(btn)
+            return btn
+
+        # Top row: Mặc định + single-tier brands
+        top_row = QHBoxLayout()
+        top_row.setSpacing(6)
+        top_row.addWidget(make_btn("Mặc định", "", ""), 1)
+
+        multi = []
+        for block in self._price_groups:
+            tiers = block.get("tiers", [])
+            if len(tiers) == 1 and tiers[0].get("label") is None:
+                top_row.addWidget(make_btn(block["brand"], block["brand"], block["brand"]), 1)
+            else:
+                multi.append(block)
+        v.addLayout(top_row)
+
+        # One row per multi-tier brand
+        for block in multi:
+            row = QHBoxLayout()
+            row.setSpacing(6)
+            label = QLabel(block["brand"])
+            label.setObjectName("price_group_label")
+            label.setMinimumWidth(70)
+            row.addWidget(label)
+            for tier in block["tiers"]:
+                tier_label = str(tier["label"])
+                key = f"{block['brand']} {tier_label}"
+                row.addWidget(make_btn(tier_label, key, block["brand"]), 1)
+            v.addLayout(row)
+
+        return container
 
     def _addItemUI(self) -> QFrame:
         box = QFrame()
@@ -197,10 +260,14 @@ class OrderPage(QWidget):
         for b in (submit_btn, print_btn, clear_btn):
             b.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
+        # Price groups buttons
+        self._price_groups_widget = self._create_price_group_buttons()
+
         layout.addWidget(brand_input)
         layout.addWidget(model_input)
         layout.addWidget(btn_box)
         layout.addWidget(self._grand_total_label)
+        layout.addWidget(self._price_groups_widget)
         layout.addStretch(1)
 
         # Store references for OrderController
@@ -429,5 +496,27 @@ class OrderPage(QWidget):
                 background: transparent;
                 border: none;
                 padding: 8px;
+            }}
+            QPushButton#price_group_btn {{
+                background: transparent;
+                color: {t['text']};
+                border: 1px solid {t['input_border']};
+                border-radius: 6px;
+                padding: 6px 8px;
+                font-size: 10pt;
+            }}
+            QPushButton#price_group_btn:hover {{
+                background: {t['btn_hover_bg']};
+            }}
+            QPushButton#price_group_btn[active="true"] {{
+                background: {t['btn_bg']};
+                border: 1px solid {t['btn_bg']};
+            }}
+            QLabel#price_group_label {{
+                color: {t['text_secondary']};
+                background: transparent;
+                border: none;
+                font-size: 10pt;
+                padding: 0 4px;
             }}
         """)

@@ -64,10 +64,21 @@ class OrderController:
         self._active_tab: int = 0
         self._tab_buttons: list = []    # list of TabButton widgets
         self._plus_btn: QPushButton | None = None
+        # Price group state + lookups
+        self._active_groups: dict[str, str] = {}
+        self._bg_lookup = {p["name"]: p["price"] for p in page._products}
+        self._group_prices: dict[str, dict[str, float]] = {}
+        for block in page._price_groups:
+            brand = block["brand"]
+            for tier in block["tiers"]:
+                label = tier["label"]
+                key = brand if label is None else f"{brand} {label}"
+                self._group_prices[key] = tier["prices"]
 
     # ── Bind ──────────────────────────────────────────────────────────────────
     def bind(self):
         page = self.page
+
         page._brand_input.currentTextChanged.connect(self.on_brand_changed)
         page._submit_btn.clicked.connect(self.on_submit)
         page._model_input.lineEdit().returnPressed.connect(self.on_submit)
@@ -78,6 +89,12 @@ class OrderController:
         page._table_view.installEventFilter(self._enter_down_filter)
         page._table_view.installEventFilter(self._delete_filter)
         page._duplicate_tab_btn.clicked.connect(self._duplicate_current_tab)
+        for btn in page._price_group_buttons:
+            key = btn.property("group_key") or None
+            brand = btn.property("brand") or ""
+            btn.clicked.connect(
+                lambda checked=False, k=key, b=brand: self._select_price_group(k, b)
+            )
 
     # ── Brand changed ─────────────────────────────────────────────────────────
     def on_brand_changed(self, text: str):
@@ -103,6 +120,13 @@ class OrderController:
         # If not found in catalog, allow as custom item with empty price
         if not product:
             product = {"brand": brand, "name": name, "price": 0}
+        
+        # If price group is active, override the product's price with the group's price (if it exists)
+        for gk in self._active_groups.values():
+            group = self._group_prices.get(gk, {})
+            if product["name"] in group:
+                product = {**product, "price": group[product["name"]]}
+                break
 
         if self._is_duplicate(product["name"]):
             QTimer.singleShot(100, self._reset_model_input)
@@ -374,6 +398,56 @@ class OrderController:
         self._apply_state(self._tabs[self._active_tab])
         self._refresh_tab_bar()
 
+    # Price group buttons
+    def _select_price_group(self, key: str | None, brand: str = ""):
+        if not key:
+            self._active_groups.clear()
+        elif self._active_groups.get(brand) == key:
+            del self._active_groups[brand]
+        else:
+            self._active_groups[brand] = key
+        merged: dict[str, float] = {}
+        for gk in self._active_groups.values():
+            merged.update(self._group_prices.get(gk, {}))
+        self._apply_price_group(merged if merged else None)
+        self._refresh_price_group_buttons()
+
+    def _apply_price_group(self, prices: dict[str, float] | None):
+        table = self.page._table_view
+        table.blockSignals(True)
+        for r in range(table.rowCount()):
+            name_item = table.item(r, 0)
+            if not name_item:
+                continue
+            name = name_item.text().strip()
+            new_price = None
+            if prices is not None and name in prices:
+                new_price = prices[name]
+            elif name in self._bg_lookup:
+                new_price = self._bg_lookup[name]
+            if new_price is None:
+                continue  # custom item — leave alone
+            table.setItem(r, 2, make_item(format_price(new_price), ALIGN_RIGHT))
+            qty_item = table.item(r, 1)
+            qty_text = qty_item.text().strip() if qty_item else ""
+            if qty_text:
+                try:
+                    qty = int(qty_text)
+                    table.setItem(r, 3, make_item(format_price(calc_total(qty, new_price)), ALIGN_RIGHT))
+                except ValueError:
+                    pass
+        table.blockSignals(False)
+        self._update_grand_total()
+
+    def _refresh_price_group_buttons(self):
+        for btn in self.page._price_group_buttons:
+            key = btn.property("group_key")
+            brand = btn.property("brand")
+            active = bool(brand) and self._active_groups.get(brand) == key
+            btn.setProperty("active", "true" if active else "false")
+            btn.style().unpolish(btn)
+            btn.style().polish(btn)
+
     # ── State save/restore (multi-tab) ────────────────────────────────────────
     def save_state(self):
         # Capture the visible widget state into the active tab
@@ -382,6 +456,7 @@ class OrderController:
         save_draft({
             "active_tab": self._active_tab,
             "tabs": self._tabs,
+            "active_price_groups": dict(self._active_groups),
         })
 
     def restore_state(self):
@@ -395,6 +470,11 @@ class OrderController:
             self._active_tab = 0
         self._apply_state(self._tabs[self._active_tab])
         self._refresh_tab_bar()
+        if data:
+            saved = data.get("active_price_groups")
+            if isinstance(saved, dict):
+                self._active_groups = dict(saved)
+        self._refresh_price_group_buttons()
 
     # ── Nested filter ─────────────────────────────────────────────────────────
     class _SelectAllFilter(QObject):

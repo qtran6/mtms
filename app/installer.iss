@@ -37,15 +37,16 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [InstallDelete]
 ; Migrate old flat layout — remove root-level exe/_internal/uninstaller on upgrade
 Type: files;          Name: "{app}\Toa Hang.exe"
-Type: filesandordirs; Name: "{app}\_internal"
-Type: files;          Name: "{app}\unins000.exe"
-Type: files;          Name: "{app}\unins000.dat"
+Type: filesandordirs; Name: "{app}\script"
+Type: files;          Name: "{app}\uninstallToaHang.exe"
+Type: files;          Name: "{app}\uninstallToaHang.dat"
 
 [Files]
 ; Bundle everything from PyInstaller's output folder into the app subfolder
 Source: "dist\MTMS\*"; DestDir: "{app}\app"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Price list stays at the root, never overwritten on update
 Source: "data\BangGia.xlsx"; DestDir: "{app}"; Flags: onlyifdoesntexist
+Source: "data\GiaDacBiet.xlsx"; DestDir: "{app}"; Flags: onlyifdoesntexist
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\app\{#MyAppExeName}"
