@@ -26,7 +26,7 @@ def log_order(customer: str, rows: list[dict]):
 
 def _send(payload: dict):
     QUEUE_FILE.parent.mkdir(parents=True, exist_ok=True)
-    server_url = load_config().get("server_url", "http://localhost:8080").rstrip("/")
+    server_url = load_config().get("server_url", "http://desktop-01:6161").rstrip("/")
 
     # Drain any pending orders first, then add this one at the end
     pending = _read_queue() + [payload]

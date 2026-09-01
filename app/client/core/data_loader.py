@@ -85,7 +85,7 @@ def load_products(file_path: Path = _FILE) -> list[dict]:
 
             price = _to_float(price)
             if price is None:
-                continue
+                price = 0
 
             products.append({
                 "brand": brand,
@@ -169,7 +169,7 @@ def load_price_groups() -> list[dict]:
                     continue
                 price = _to_float(price)
                 if price is None:
-                    continue
+                    price = 0
                 prices[str(name).strip()] = price
             current["tiers"].append({"label": label, "prices": prices})
 

@@ -1,6 +1,6 @@
 ; installer.iss — Inno Setup script for MTMS
 ; Open in Inno Setup Compiler and click Build
-; Layout: {app}\BangGia.xlsx (user-editable) + {app}\app\ (exe, _internal, uninstaller)
+; Layout: {app}\BangGia.xlsx + {app}\GiaDacBiet.xlsx (user-editable) + {app}\app\ (exe, _internal, uninstaller)
 
 #define MyAppName       "Toa Hang"
 #define VerFile FileOpen("client\version.py")
@@ -37,15 +37,15 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [InstallDelete]
 ; Migrate old flat layout — remove root-level exe/_internal/uninstaller on upgrade
 Type: files;          Name: "{app}\Toa Hang.exe"
-Type: filesandordirs; Name: "{app}\script"
-Type: files;          Name: "{app}\uninstallToaHang.exe"
-Type: files;          Name: "{app}\uninstallToaHang.dat"
+Type: filesandordirs; Name: "{app}\_internal"
+Type: files;          Name: "{app}\unins000.exe"
+Type: files;          Name: "{app}\unins000.dat"
 
 [Files]
 ; Bundle everything from PyInstaller's output folder into the app subfolder
 Source: "dist\MTMS\*"; DestDir: "{app}\app"; Flags: ignoreversion recursesubdirs createallsubdirs
-; Price list stays at the root, never overwritten on update
-Source: "data\BangGia.xlsx"; DestDir: "{app}"; Flags: onlyifdoesntexist
+; Price lists stay at the root, never overwritten on update
+Source: "data\BangGia.xlsx";    DestDir: "{app}"; Flags: onlyifdoesntexist
 Source: "data\GiaDacBiet.xlsx"; DestDir: "{app}"; Flags: onlyifdoesntexist
 
 [Icons]

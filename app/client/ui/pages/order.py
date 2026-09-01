@@ -304,7 +304,7 @@ class OrderPage(QWidget):
         from PySide6.QtCore import QUrl
         from client.core.config_service import load_config
 
-        server_url = load_config().get("server_url", "http://localhost:6161").rstrip("/")
+        server_url = load_config().get("server_url", "http://desktop-01:6161").rstrip("/")
         QDesktopServices.openUrl(QUrl(f"{server_url}"))
 
     # ── Theme ─────────────────────────────────────────────────────────────────
