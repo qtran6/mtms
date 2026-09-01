@@ -9,7 +9,7 @@ def _config_file() -> Path:
 
 def load_config() -> dict:
     path = _config_file()
-    server_url = "http://localhost:6034"
+    server_url = "http://Desktop-01:6161"
     if not path.exists():
         return {"server_url": server_url}
     try:

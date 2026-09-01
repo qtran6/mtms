@@ -260,6 +260,11 @@ class OrderPage(QWidget):
         for b in (submit_btn, print_btn, clear_btn):
             b.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
+        tong_hop_btn = QPushButton("Tổng Hợp")
+        tong_hop_btn.setObjectName("tong_hop_btn")
+        tong_hop_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        tong_hop_btn.clicked.connect(self._open_tong_hop)
+
         # Price groups buttons
         self._price_groups_widget = self._create_price_group_buttons()
 
@@ -269,6 +274,10 @@ class OrderPage(QWidget):
         layout.addWidget(self._grand_total_label)
         layout.addWidget(self._price_groups_widget)
         layout.addStretch(1)
+        tong_hop_row = QHBoxLayout()
+        tong_hop_row.addWidget(tong_hop_btn)
+        tong_hop_row.addStretch(1)
+        layout.addLayout(tong_hop_row)
 
         # Store references for OrderController
         self._brand_input = brand_input
@@ -289,6 +298,14 @@ class OrderPage(QWidget):
                 pass
         self.setFocus()
         super().mousePressEvent(event)
+
+    def _open_tong_hop(self):
+        from PySide6.QtGui import QDesktopServices
+        from PySide6.QtCore import QUrl
+        from client.core.config_service import load_config
+
+        server_url = load_config().get("server_url", "http://localhost:6161").rstrip("/")
+        QDesktopServices.openUrl(QUrl(f"{server_url}"))
 
     # ── Theme ─────────────────────────────────────────────────────────────────
     def apply_theme(self, t: dict):
@@ -518,5 +535,16 @@ class OrderPage(QWidget):
                 border: none;
                 font-size: 10pt;
                 padding: 0 4px;
+            }}
+            QPushButton#tong_hop_btn {{
+                background: transparent;
+                color: {t['text']};
+                border: 1px solid {t['input_border']};
+                border-radius: 10px;
+                padding: 10px;
+                font-size: 11pt;
+            }}
+            QPushButton#tong_hop_btn:hover {{
+                background: {t['btn_hover_bg']};
             }}
         """)

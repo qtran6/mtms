@@ -190,4 +190,4 @@ def aggregate_pdf(payload: AggregateIn):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=6034)
+    uvicorn.run(app, host="0.0.0.0", port=6161)
