@@ -7,6 +7,12 @@ from pathlib import Path
 from datetime import datetime, date
 import sqlite3, json
 from pdf import build_pdf
+import sys
+
+def _resource(name: str) -> Path:
+    """Resolve a bundled resource file, whether frozen or dev."""
+    base = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
+    return base / name
 
 DB = Path(__file__).parent / "orders.db"
 
@@ -56,15 +62,15 @@ def init_db():
 app = FastAPI()
 init_db()
 
-app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
+app.mount("/static", StaticFiles(directory=_resource("static")), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 def index():
-    return (Path(__file__).parent / "index.html").read_text(encoding="utf-8")
+    return _resource("index.html").read_text(encoding="utf-8")
 
 @app.get("/aggregate", response_class=HTMLResponse)
 def aggregate_page():
-    return (Path(__file__).parent / "aggregate.html").read_text(encoding="utf-8")
+    return _resource("aggregate.html").read_text(encoding="utf-8")
 
 @app.get("/orders")
 def list_orders(date: str,

@@ -20,15 +20,19 @@ from reportlab.platypus import (
     NextPageTemplate, Spacer,
 )
 
+def _resource(name: str) -> Path:
+    import sys
+    base = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
+    return base / name
+
 _HERE = Path(__file__).parent
-_FONTS_DIR = _HERE / "fonts"
-_CONFIG_FILE = _HERE / "company.json"
+_FONTS_DIR = _resource("fonts")
+_CONFIG_FILE = _resource("company.json")
 
 _FONT_REGULAR = "Calibri"
 _FONT_BOLD = "Calibri-Bold"
 
 _fonts_registered = False
-
 
 def _register_fonts() -> bool:
     global _fonts_registered
