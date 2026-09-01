@@ -71,3 +71,25 @@ tr.order:hover { background: #faf9f6; }
 }
 
 .empty { padding: 40px; text-align: center; color: #888780; }
+
+tfoot tr {
+  background: #f5f3ee;
+  border-top: 0.5px solid #888780;
+}
+tfoot td { padding: 14px 20px; }
+
+input.edit {
+  width: 100%;
+  padding: 4px 6px;
+  font-size: 13px;
+  font-family: inherit;
+  border: 0.5px solid #b4b2a9;
+  border-radius: 4px;
+  background: #fff;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+input.edit:focus {
+  outline: none;
+  border-color: #185FA5;
+}

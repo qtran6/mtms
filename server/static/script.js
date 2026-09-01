@@ -55,7 +55,7 @@ function render(orders) {
         <td colspan="5">
           <table>
             <tr class="muted">
-              <td>Tên</td>
+              <td>Tên HH</td>
               <td class="num">SL</td>
               <td class="num">Đơn giá</td>
               <td class="num">Thành tiền</td>

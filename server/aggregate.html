@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>MTMS · Tổng hợp</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="head">  
+      <div>
+        <h1>Tổng hợp</h1>
+        <div class="sub">Gộp đơn hàng theo sản phẩm, giá rẻ nhất</div>
+      </div>
+      <a href="/" style="font-size: 13px; color: #185FA5;">← Đơn hàng</a>
+    </div>
+
+    <div class="filters">
+      <label>Từ ngày</label>
+      <input type="date" id="date-from">
+      <label style="margin-left: 12px;">Đến ngày</label>
+      <input type="date" id="date-to">
+      <input type="text" id="customer" placeholder="Tên khách hàng..." style="flex: 1; margin-left: 12px;">
+    </div>
+
+    <div id="body"></div>
+  </div>
+</div>
+<script src="/static/aggregate.js"></script>
+</body>
+</html>

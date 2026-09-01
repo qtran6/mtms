@@ -13,10 +13,13 @@
         <h1>Đơn hàng theo ngày</h1>
         <div class="sub" id="date-label">—</div>
       </div>
-      <div class="date-nav">
-        <button onclick="shiftDay(-1)">◀</button>
-        <input type="date" id="date">
-        <button onclick="shiftDay(1)">▶</button>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <a href="/aggregate" style="font-size: 13px; color: #185FA5;">Tổng hợp →</a>
+        <div class="date-nav">
+          <button onclick="shiftDay(-1)">◀</button>
+          <input type="date" id="date">
+          <button onclick="shiftDay(1)">▶</button>
+        </div>
       </div>
     </div>
 

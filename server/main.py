@@ -50,6 +50,10 @@ app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), na
 def index():
     return (Path(__file__).parent / "index.html").read_text(encoding="utf-8")
 
+@app.get("/aggregate", response_class=HTMLResponse)
+def aggregate_page():
+    return (Path(__file__).parent / "aggregate.html").read_text(encoding="utf-8")
+
 @app.get("/orders")
 def list_orders(date: str,
                 brand: str | None = None,
@@ -124,6 +128,38 @@ def delete_order(order_id: int):
             raise HTTPException(404, "not found")
     return {"ok": True}
 
+@app.get("/api/aggregate")
+def aggregate(date_from: str, date_to: str):
+    with __conn() as c:
+        raw = c.execute(
+            "SELECT rows_json FROM orders WHERE printed_date BETWEEN ? AND ?",
+            (date_from, date_to)
+        ).fetchall()
+
+    grouped: dict[tuple[str, str], dict] = {}
+    for row in raw:
+        for r in json.loads(row["rows_json"]):
+            key = (r.get("brand", ""), r["name"])
+            if key not in grouped:
+                grouped[key] = {
+                    "brand": key[0],
+                    "name":  key[1],
+                    "qty":   r["qty"],
+                    "price": r["price"],
+                }
+            else:
+                grouped[key]["qty"] += r["qty"]
+                grouped[key]["price"] = min(grouped[key]["price"], r["price"])
+
+    items = sorted(grouped.values(), key=lambda x: (x["brand"], x["name"]))
+    for it in items:
+        it["total"] = it["qty"] * it["price"]
+
+    return {
+        "items": items,
+        "grand_total": sum(it["total"] for it in items),
+    }
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=6034)
+    uvicorn.run(app, host="0.0.0.0", port=6034)

@@ -26,11 +26,19 @@ def log_order(customer: str, rows: list[dict]):
 
 def _send(payload: dict):
     QUEUE_FILE.parent.mkdir(parents=True, exist_ok=True)
-    server_url = load_config().get("server_url", "http://localhost:6034").rstrip("/")
-    if not server_url:
-        _enqueue(payload)
-        return
+    server_url = load_config().get("server_url", "http://localhost:8080").rstrip("/")
 
+    # Drain any pending orders first, then add this one at the end
+    pending = _read_queue() + [payload]
+    remaining = []
+    for item in pending:
+        if _post(server_url, item):
+            continue
+        remaining.append(item)
+    _write_queue(remaining)
+
+def _post(server_url: str, payload: dict) -> bool:
+    """POST one order. Return True on success, False on any failure."""
     try:
         req = Request(
             f"{server_url}/orders",
@@ -39,12 +47,19 @@ def _send(payload: dict):
             method="POST",
         )
         with urlopen(req, timeout=3) as r:
-            if r.status != 200:
-                _enqueue(payload)
+            return r.status == 200
     except (URLError, TimeoutError, OSError):
-        _enqueue(payload)
+        return False
 
 
-def _enqueue(payload: dict):
-    with open(QUEUE_FILE, "a", encoding="utf-8") as f:
-        f.write(json.dumps(payload, ensure_ascii=False) + "\n")
+def _read_queue() -> list[dict]:
+    if not QUEUE_FILE.exists():
+        return []
+    with open(QUEUE_FILE, encoding="utf-8") as f:
+        return [json.loads(line) for line in f if line.strip()]
+
+
+def _write_queue(items: list[dict]):
+    with open(QUEUE_FILE, "w", encoding="utf-8") as f:
+        for it in items:
+            f.write(json.dumps(it, ensure_ascii=False) + "\n")
