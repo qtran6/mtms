@@ -4,11 +4,18 @@ const fmt = n => n.toLocaleString("vi-VN");
 
 let items = [];   // in-memory edits live here
 
+async function loadBrands() {
+  const brands = await fetch("/brands").then(r => r.json());
+  $("brand").innerHTML = '<option value="">Tất cả</option>' +
+    brands.map(b => `<option>${b}</option>`).join("");
+}
+
 async function load() {
   const params = new URLSearchParams({
     date_from: $("date-from").value,
     date_to: $("date-to").value,
   });
+  if ($("brand").value) params.set("brand", $("brand").value);
   const data = await fetch("/api/aggregate?" + params).then(r => r.json());
   items = data.items;
   render();
@@ -66,8 +73,32 @@ function grandTotal() {
   return items.reduce((sum, it) => sum + it.total, 0);
 }
 
+async function printPdf() {
+  if (!items.length) {
+    alert("Không có sản phẩm để in.");
+    return;
+  }
+  const payload = {
+    customer: $("customer").value,
+    rows: items,
+  };
+  const res = await fetch("/api/aggregate/pdf", {
+    method: "POST",
+    headers: {"Content-Type": "application/json; charset=utf-8"},
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    alert("Không tạo được PDF.");
+    return;
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  window.open(url, "_blank");
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}
+
 $("date-from").value = today();
 $("date-to").value = today();
-["date-from", "date-to"].forEach(id => $(id).addEventListener("change", load));
+["date-from", "date-to", "brand"].forEach(id => $(id).addEventListener("change", load));
 
-load();
+loadBrands().then(load);

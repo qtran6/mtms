@@ -1,11 +1,12 @@
 """MTMS logging server — runs on the main PC. Localhost UI + LAN client POSTs."""
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from pathlib import Path
 from datetime import datetime, date
 import sqlite3, json
+from pdf import build_pdf
 
 DB = Path(__file__).parent / "orders.db"
 
@@ -21,6 +22,17 @@ class OrderIn(BaseModel):
     printed_at: str
     customer: str
     rows: list[RowIn]
+
+class AggregateRowIn(BaseModel):
+    brand: str = ""
+    name: str
+    qty: int
+    price: float
+    total: float
+
+class AggregateIn(BaseModel):
+    customer: str = ""
+    rows: list[AggregateRowIn]
 
 # Database connection helper
 def __conn():
@@ -129,7 +141,7 @@ def delete_order(order_id: int):
     return {"ok": True}
 
 @app.get("/api/aggregate")
-def aggregate(date_from: str, date_to: str):
+def aggregate(date_from: str, date_to: str, brand: str | None = None):
     with __conn() as c:
         raw = c.execute(
             "SELECT rows_json FROM orders WHERE printed_date BETWEEN ? AND ?",
@@ -139,6 +151,8 @@ def aggregate(date_from: str, date_to: str):
     grouped: dict[tuple[str, str], dict] = {}
     for row in raw:
         for r in json.loads(row["rows_json"]):
+            if brand and r.get("brand", "") != brand:
+                continue
             key = (r.get("brand", ""), r["name"])
             if key not in grouped:
                 grouped[key] = {
@@ -159,6 +173,20 @@ def aggregate(date_from: str, date_to: str):
         "items": items,
         "grand_total": sum(it["total"] for it in items),
     }
+
+@app.post("/api/aggregate/pdf")
+def aggregate_pdf(payload: AggregateIn):
+    if not payload.rows:
+        raise HTTPException(400, "no rows")
+    pdf_bytes = build_pdf(
+        customer=payload.customer,
+        rows=[r.model_dump() for r in payload.rows],
+    )
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": 'inline; filename="tong-hop.pdf"'},
+    )
 
 if __name__ == "__main__":
     import uvicorn

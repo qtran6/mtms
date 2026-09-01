@@ -13,7 +13,10 @@
         <h1>Tổng hợp</h1>
         <div class="sub">Gộp đơn hàng theo sản phẩm, giá rẻ nhất</div>
       </div>
-      <a href="/" style="font-size: 13px; color: #185FA5;">← Đơn hàng</a>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <button onclick="printPdf()" style="padding: 8px 14px; font-size: 13px; background: #185FA5; color: #fff; border: none; border-radius: 6px; cursor: pointer;">In</button>
+        <a href="/" style="font-size: 13px; color: #185FA5;">← Đơn hàng</a>
+      </div>
     </div>
 
     <div class="filters">
@@ -21,6 +24,8 @@
       <input type="date" id="date-from">
       <label style="margin-left: 12px;">Đến ngày</label>
       <input type="date" id="date-to">
+      <label style="margin-left: 12px;">Thương hiệu</label>
+      <select id="brand"><option value="">Tất cả</option></select>
       <input type="text" id="customer" placeholder="Tên khách hàng..." style="flex: 1; margin-left: 12px;">
     </div>
 
