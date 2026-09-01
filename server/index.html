@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>MTMS · Đơn hàng theo ngày</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="head">
+      <div>
+        <h1>Đơn hàng theo ngày</h1>
+        <div class="sub" id="date-label">—</div>
+      </div>
+      <div class="date-nav">
+        <button onclick="shiftDay(-1)">◀</button>
+        <input type="date" id="date">
+        <button onclick="shiftDay(1)">▶</button>
+      </div>
+    </div>
+
+    <div class="filters">
+      <label>Thương hiệu</label>
+      <select id="brand"><option value="">Tất cả</option></select>
+      <label style="margin-left: 12px;">Máy</label>
+      <select id="client"><option value="">Tất cả</option></select>
+      <input type="text" id="customer" placeholder="Tìm khách hàng...">
+    </div>
+
+    <div id="body"></div>
+  </div>
+</div>
+<script src="/static/script.js"></script>
+</body>
+</html>

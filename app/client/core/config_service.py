@@ -9,8 +9,9 @@ def _config_file() -> Path:
 
 def load_config() -> dict:
     path = _config_file()
+    server_url = "http://localhost:6034"
     if not path.exists():
-        return {}
+        return {"server_url": server_url}
     try:
         return json.loads(path.read_text(encoding="utf-8"))
     except Exception:

@@ -1,0 +1,73 @@
+body {
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    margin: 0;
+    background: #f5f3ee;
+    color: #2c2c2a;
+}
+.wrap { max-width: 1100px; margin: 24px auto; padding: 0 20px; }
+.card {
+    background: #fff;
+    border-radius: 12px;
+    border: 0.5px solid #d3d1c7;
+    overflow: hidden;
+}
+.head {
+    padding: 16px 20px;
+    border-bottom: 0.5px solid #d3d1c7;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.head h1 { margin: 0; font-size: 18px; font-weight: 500; }
+.head .sub { font-size: 13px; color: #888780; margin-top: 2px; }
+.date-nav { display: flex; gap: 8px; }
+.date-nav button, .date-nav input {
+    padding: 8px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    border: 0.5px solid #b4b2a9;
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+}
+.filters {
+    padding: 12px 20px;
+    border-bottom: 0.5px solid #d3d1c7;
+    background: #f5f3ee;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.filters label { font-size: 12px; color: #888780; }
+.filters select, .filters input {
+    padding: 6px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    border: 0.5px solid #b4b2a9;
+    border-radius: 6px;
+    background: #fff;
+}
+.filters input[type="text"] { flex: 1; margin-left: 12px; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead tr { background: #f5f3ee; color: #888780; text-align: left; }
+th { padding: 10px 20px; font-weight: 500; }
+td { padding: 12px 20px; border-top: 0.5px solid #d3d1c7; }
+tr.order { cursor: pointer; }
+tr.order:hover { background: #faf9f6; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+.muted { color: #888780; }
+
+.detail { background: #f5f3ee; }
+.detail td { padding: 0; }
+.detail table {
+    width: auto;
+    margin: 8px 20px 12px 60px;
+    font-size: 12px;
+}
+.detail th, .detail td {
+    border: none;
+    padding: 3px 12px 3px 0;
+}
+
+.empty { padding: 40px; text-align: center; color: #888780; }

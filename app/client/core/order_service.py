@@ -222,6 +222,11 @@ class OrderController:
             QMessageBox.warning(page, "Lỗi in", f"Không tạo được phiếu in:\n{e}")
             return
         if pdf_path:
+            from client.core.order_logger import log_order
+            log_order(
+                customer=page._customer_text_box.text(),
+                rows=self._rows_with_brand(),
+            )
             window = page.window()
             if hasattr(window, "show_print_preview"):
                 window.show_print_preview(pdf_path)
@@ -262,6 +267,34 @@ class OrderController:
             if item and item.text().strip() == name:
                 return True
         return False
+
+    def _rows_with_brand(self) -> list[dict]:
+        """Capture visible table rows with brand attached from the catalog."""
+        table = self.page._table_view
+        brand_by_name = {p["name"]: p["brand"] for p in self.page._products}
+        rows = []
+        for r in range(table.rowCount()):
+            name_item = table.item(r, 0)
+            if not name_item or not name_item.text().strip():
+                continue
+            name = name_item.text().strip()
+            qty_text = (table.item(r, 1).text() if table.item(r, 1) else "").strip()
+            price_text = (table.item(r, 2).text() if table.item(r, 2) else "").replace(",", "").strip()
+            total_text = (table.item(r, 3).text() if table.item(r, 3) else "").replace(",", "").strip()
+            try:
+                qty = int(qty_text)
+                price = float(price_text)
+                total = float(total_text)
+            except ValueError:
+                continue
+            rows.append({
+                "brand": brand_by_name.get(name, ""),
+                "name": name,
+                "qty": qty,
+                "price": price,
+                "total": total,
+            })
+        return rows
 
     # ── Tab management ────────────────────────────────────────────────────────
     def _capture_current_state(self) -> dict:

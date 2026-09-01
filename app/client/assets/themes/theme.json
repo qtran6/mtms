@@ -24,6 +24,8 @@
     "placeholder":      "#55555f",
     "btn_bg":           "#2e2e35",
     "btn_hover_bg":     "#2e2e35",
+    "clear_btn_bg":     "#dc2626",
+    "clear_btn_hover_bg":"#b91c1c",
     "shadow":           "rgba(0, 0, 0, 0.5)",
     "cast_shadow":      "rgba(0, 0, 0, 0.25)"
   },
